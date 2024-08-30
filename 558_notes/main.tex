@@ -1,0 +1,196 @@
+\documentclass{article}
+\input{include.tex}
+
+% Graphics path
+\graphicspath{{./figs}}
+
+% invert color. change \mdfdefinestyle{problemstyle} command if submitting document
+\pagecolor{black}
+\color{white}
+
+\title{Math 558 - Applied Nonlinear Dynamics}
+\author{Autumn 2024}
+
+\begin{document}   
+\maketitle
+\frenchspacing
+
+\section*{27-29 August 2024}
+Consider a vector-valued function $y: \R \to \R^d$ and let $y'(t) = f(t, y(t))$, $f : \R \times \R^d \to \R^d$. Let $f$ be supplied with initial condition $y(t_0) = \alpha \in \R^d$. Our focus will remain on these types of differential equations.
+
+\newpar
+Remark: We can note that $y^{(n)}(t) = f(t, y(t), y'(t), \hdots, y^{(n - 1)}(t))$. We can introduce auxiliary variables $z_0(t) = y(t)$, $z_1(t) = y'(t)$, $\hdots$, $z_{n - 1}(t) = y^{(n - 1)}(t)$. Then, we get the natural relations $z_0' = z_1$, $z_1' = z_2$, $\hdots$, $z'_{n - 2} = z_{n - 1}$, and $z'_{n - 1} = f(t, z_0, z_1, \hdots, z_{n - 1})$, so in principle the aforementioned equation can be reduced into a system of first-order equations. 
+
+\newpar
+If $y' = f(y)$ (that is, $f$ does not depend on $t$), then the equation is said to be \textit{autonomous}. In general, the nonautonomous case can be reduced to the autonomous case by introducing the auxiliary variable $z$ which satisfies $z' = 1$ and $z(t_0) = t_0$. 
+
+\newpar 
+Now, let us consider the question of existence and uniqueness of solutions. We can consider the equation $y' = 1+ y^2$ with the initial condition $y(0) = 0$. Then, our equation can easily be solved using separation of variables, resulting in the equation $\arctan(y) = t + C$. By matching the boundary value conditions, we can deduce that $y(t) = \tan(t)$; however, this is only valid for $-\pi/2 < t < \pi/2$, so we may not have global existence for every ODE. 
+\newpar
+
+Now, let us consider the ODE $y' = \sqrt{|y|}$ with the initial condition $y(0) = 0$. By separating and integrating, we get that $y(t) = \frac{1}{4} t^2$ - which is a solution; however, there are uncountably many solutions. Chose any $a > 0$ and define 
+    \[
+        y_a(t) = 
+        \begin{cases}
+            0, \quad& 0 \leq t \leq a \\
+            \displaystyle\frac{1}{4}(t - a)^2 \quad& t \geq a
+        \end{cases}
+    \]
+These functions are not twice-differentiable; however, $y \in C^{1, 1}$ (that is, it's derivative is Lipshitz). 
+
+\newpar
+To formulate the Existence and Uniqueness theorems, we need the following results and definitions:
+
+
+\begin{theorem}[Contraction mapping principle (Banach fixed pt. theorem).]{}
+    Let $X$ be a normed, complete vector space. let $S \subseteq X$ be a closed subset. Let $\Psi : S \to S$. Assume there is a scalar value $\theta \in [0, 1)$ such that $|\Psi(x) - \Psi(y)| \leq \theta|x - y|$ for all $x, y \in S$. Then, $\Psi$ has a fixed point $p \in S$. That is, there exists $p \in S$ such that $\Psi(p) = p$. Moreover, if $x_0 \in S$, the iteration $x_{n + 1} = \Psi(x_n)$ converges to $p$: $\displaystyle\lim_{n \to \infty} x_n = p$. In fact, $p$ is unique and 
+        \[
+            |x_n - p| \leq \frac{\theta^n}{1 - \theta}|x_1 - x_0|.
+        \]
+\end{theorem}
+\begin{proof}
+    First, we can note that for any $j > 1$,
+        \[|x_{j + 1} - x_j| = |\Psi(x_j) - \Psi(x_{j - 1}) | \leq \theta |x_j - x_{j - 1}| \leq \theta^2 |x_{j - 1} - x_{j - 2}| \leq \hdots \leq \theta^j|x_1 - x_0|.\]
+    Now, we let $n \geq m$, with both $n$ and $m$ very large. By observing the natural telescoping sum, we get 
+    \begin{align*}
+        x_n - x_m &= \sum_{j = m}^{n - 1} (x_{j + 1} - x_j) \leq \sum_{j = m}^{n - 1} \theta^j|x_1 - x_0| \leq \theta^m |x_1 - x_0| \sum_{j =0}^\infty \theta^j = \frac{\theta^m}{1 - \theta} | x_1 - x_0|
+    \end{align*}
+    by the geometric sum formula. This implies $\{x_n\}$ is Cauchy, so there is a limit $p \in X$ such that $\displaystyle\lim_{n \to \infty} x_n = p$. Since $S$ is closed, $p \in S$. By taking $n \to \infty$, we can deduce that 
+        \[
+            |p - x_m| \leq \frac{\theta^m}{1 - \theta}|x_1 - x_0|.
+        \]
+    Now, we can show the uniqueness of $p$. Suppose for the sake of contradiction that $p, q \in S$, $p \neq q$. Then $\Psi(p) = p$ and $\Psi(q) = q$. Then, $|p - q| = |\Psi(p) - \Psi(q)| \leq \theta | p - q|$, so $|p - q| = 0$, thus $p = q$. 
+\end{proof}
+
+\begin{definition}
+    For some $A \subseteq \R \times \R^d$ and $f : A \to \R^d$ is \textit{Lipshitz} if there exists a constant $L$ such that 
+        \[
+            |f(t, y) - f(t,z)| \leq L|y - z|
+        \]
+    for all $(t, y), (t, z) \in A$. If $f$ is continuously differentiable with respect to $y$ on $A$ and $A$ is compact, then $f$ is Lipshitz.
+\end{definition}
+
+
+\begin{theorem}[Theorem (Hartman - Grobman)]{}
+    Define $Q_{a, b} =  \{(t, y) : \, t_0 \leq t \leq t_0 + a, \alpha_j = b \leq y_j \leq \alpha_j + b\}$. Let $f: \R \times R^d$ be continuous and Lipshitz in $y$ variable on $Q_{a, b}$. Then, there exists $\epsilon > 0$ such that there is a solution to the ODE system $y' = f(t, y)$, $y(t_0) = \alpha$ for the time interval $t_0 \leq t \leq t_0 + \epsilon$.  
+\end{theorem}
+\begin{proof}
+    Let us define
+    \begin{align*}
+        M &= \max_{\substack{t, y \in Q_{a, b}\\ j}}|f_j(t, y)| < \infty, \\
+        L &= \max_{\substack{(t, y), (t, z) \in Q_{a, b} \\ y \neq z \\ j}} \frac{f_j(t, y) - f_j(t, z)}{|y - z|} < \infty.
+    \end{align*}
+    Let $\epsilon = \frac{1}{2d}\min \left\{a, \frac{b}{M}, \frac{1}{L} \right\}.$ Let $X_\epsilon = C([t_0, t_0 + \epsilon], \R^d)$ be a vector space. Furthermore, if $\phi \in X_\epsilon$, we can define the norm of $\phi$ to be 
+    \[
+        ||\phi|| = \max_{\substack{t_0 \leq t \leq t_0 + \epsilon \\ j = 1, \hdots, d}}|\phi_j(t)|.
+    \]
+    Since the uniform limit of continuous functions is continuous, the space $X_\epsilon$ is complete. Let $S = \{\phi \in X_\epsilon : (t, \phi(t)) \in Q_{\epsilon, b} \t{ for } t_0 \leq t \leq t_0 + \epsilon\}$. Now, let us define the mapping $\Psi$ by 
+        \[
+            \Psi[y](t) = \alpha + \int_{t_0}^t f(s, y(s)) \, \t{d}s.
+        \]
+    Clearly, $\Psi : X_\epsilon \to X_\epsilon$. Now, we can note that 
+        \begin{align*}
+            |\Psi[\phi_j](t) - \alpha_j| \leq  \int_{t_0}^t \left|f_j(s, \phi(s))\right| \, \t{d}s &\leq (t - t_0) M \\
+            &\leq \epsilon M \leq b.
+        \end{align*}
+    Thus, we get $\Psi : S \to S$. Finally, we need to show that $\Psi$ is a contraction. Consider $\phi, \psi \in S$. Now, we can note that 
+        \begin{align*}
+            |\Psi[\phi_j](t) - \Psi[\psi_j](t)| &\leq \int_{t_0}^t \left| f_j(s, \phi(s)) - f_j(s, \psi(s))\right|\, \t{d}s \\
+            &\leq \int_{t_0}^t L |\phi(s) - \psi(s)| \, \t{d}s\\
+            &\leq \max_{t_0 \leq s \leq t_0 + \epsilon} | \phi(s) - \psi(s) | \cdot L\epsilon.
+        \end{align*}
+    For $t_0 \leq t \leq t_0 + \epsilon$, we have 
+        \begin{align*}
+            ||\Psi[\phi] - \Psi[\psi]|| &= \max_{t_0 \leq t \leq t_0 + \epsilon} | \Psi[\phi]_j (t) - \Psi[\psi]_j(t)| \\
+            &\leq L \epsilon \cdot \max_{t_0 \leq s \leq t_0 + \epsilon}|\phi(s) - \psi(s)| \\
+            &\leq \frac{1}{2} \max_{t_0 \leq s \leq t_0 + \epsilon} |\phi(s) - \psi(s)| \\
+            &\leq \frac{1}{2}\max_{\substack{t_0 \leq s \leq t_0 + \epsilon \\ 1 \leq j \leq d}} |\phi_j(s) - \psi_j(s)|. 
+        \end{align*}
+    This implies $||\Psi[\phi] - \Psi[\phi] || \leq \frac{1}{2} ||\phi - \psi ||$. Thus, by the contraction mapping principle, there exists a $y \in S$ such that $\Psi[y] = y$ such that 
+        \[
+            y(t) = \alpha + \int_{t_0}^t f(s, y(s))\, \t{d}s.
+        \]
+    By differentiating component-wise, we can deduce that $y'(t) = f(t, y(t))$ with $y(t_0) = \alpha$ for $t_0 \leq t \leq t_0 + \epsilon$. 
+\end{proof}
+
+
+
+% \begin{theorem}[Theorem (Existence and Uniqueness).]
+%     Consider $y' = f(t, y)$ with the initial value condition $y(t_0) = \alpha$. If $f$ is continuous on $Q_{a, b}$ and Lipshitz in $y$ on $Q_{a, b}$, then there exists a solution to the IVP on $t_0 \leq t \leq t_0 + \epsilon$ for some $\epsilon > 0$ ($\epsilon$ may be less than $a$). Furthrmore, the solution along this interval is unique. 
+% \end{theorem}
+% \begin{proof}
+%     First, we integrate the equation. Doing so, we get
+%         \[
+%             y(t) - y(t_0) = \int_{t_0}^t y'(s) \, \t{d}s = \int_{t_0}^t f(s, y(s)) \t{d}s,
+%         \]
+%     so the differential equation is equivalent to solving the integral equation 
+%         \[
+%             y(t) = \alpha + \int_{t_0}^t f(s, y(s)) \, \t{d}s
+%         \]
+%     where $\alpha = y(t_0)$ (we are integrating component-wise when we are integrating a vector-valued function). We approach the solution of the integration equation via \textit{fixed-point iteration}. Suppose we start with an inital guess for the solution $y_0(t)$, and then generate $y_1(t), y_2(t)$, $\hdots$, $y_n(t)$. Then, we get the next iteration by evaluating
+%         \[
+%             y_{n + 1}(t) = \alpha + \int_{t_0}^t f(s, y_n(s)) \, \t{d}s.
+%         \]
+%     Typically, we choose the initial guess to be the constant function $y_0(t) = \alpha$. We desire to prove that this iteration converges to a unique solution of the IVP over a small enough interval. 
+%     \newpar
+
+%     Let $\Psi[y](t) = \alpha + \int_{t_0}^t f(s, y(s)) \, \t{d}s$. Then, $y_{n + 1} = \Psi[y_n]$. If you find $y(t)$ such that $y = \Psi[y]$ (that is, $y$ is a fixed point of the map $\Psi$), then you will have found a solution to the IVP. 
+% \end{proof}
+
+\begin{example}
+    The following example demonstrates fixed point iteration. Consider the differential equation $y' = y$ with the initial condition $y(0) = 1$. Clearly, $y(t) = e^t$, but we will show this using fixed-point iteration. Let $y_0(t) = 1$. Then, we can note that 
+    \begin{align*}
+        y_1(t) &= \Psi[y_0]{t} = 1 + \int_{0}^t y_0(s) \, \t{d}s = 1 + \int_{0}^t 1 \, \t{d}s = 1 + t.
+    \end{align*}
+    Doing this agian, we can deduce 
+        \[
+            y_2(t) = \Psi[y_1](t) = 1 + \int_0^t (1 + s) \, \t{d}s = 1 + t + \frac{t^2}{2}.
+        \]
+    Continuing onwards, we arrive at the Taylor series expansion for $e^t$ (which is easy to show). 
+\end{example}
+
+
+
+\begin{theorem}[Lemma.]{}
+    \textit{Gromwall Inequality:} Let $y(t), g(t)$ be continuous, non-negative functions for $t = t_0$. Let $A \geq 0$. If 
+        \[
+            y(t) \leq A + \int_{t_0}^t g(s)y(s) \t{d}s
+        \]
+    for $t \geq t_0$, then it follows that 
+        \[
+            |y(t)| \leq A \exp \left( \int_{t_0}^t g(s) \, \t{d}s \right)
+        \]
+    for all $t \geq t_0$. 
+\end{theorem}
+\begin{proof}
+    Let 
+    \[
+        z(t) = A + \int_{t_0}^t g(s) y(s) \, \t{d}s.
+    \]
+    Then, $y(t) \leq z(t)$. And furthermore, $z'(t) = g(t)y(t) \leq g(t)z(t)$. For now, let us assume that $A > 0$. Thus, we get $z'(t) / z(t) \leq g(t)$, and since $z$ never vanishes, we can deduce 
+        \[
+         \dv{}{t}\left\{\log(z(t)) - \int_{t_0}^t g(s) \, \t{d}s \right\} = 0.
+        \]
+    Thus, 
+        \[
+            \log(z(t)) - \int_{t_0}^t g(s) \, \t{d}s  \leq \log(A).
+        \] 
+    From this, finally arrive at 
+        \[
+            A \exp \left(\int_{t_0}^t g(s) \t{d}s \right) \geq z(t) \geq y(t).
+        \]
+    It is easy to verify this is true even when $A = 0$. 
+\end{proof}
+ 
+
+Note: if 
+    \[
+        y(t) = y(t_0) + \int_{t_0}^t g(s)y(s) \t{d}s,
+    \]
+it follows that $y'(t) = g(t)y(t)$. This is an easy differential equation to solve, and it turns out that 
+    \[
+        y(t) = y(t_0) \exp \left( \int_{t_0}^t g(s) \, \t{d}s\right),
+    \]
+which is precisely the bound we were looking for.  
+
+\end{document}

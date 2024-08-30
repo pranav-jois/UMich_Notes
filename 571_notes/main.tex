@@ -1,0 +1,211 @@
+\documentclass{article}
+\input{include.tex}
+
+% Graphics path
+\graphicspath{{./figs}}
+
+% invert color. change \mdfdefinestyle{problemstyle} command if submitting document
+\pagecolor{black}
+\color{white}
+
+\title{Math 571 - Numerical Linear Algebra}
+\author{Autumn 2024}
+
+\begin{document}   
+
+\maketitle
+
+\section*{27 Aug 2024}
+There are three types of problems that arise in numerical linear algebra.
+\begin{itemize}
+    \item[1.] Suppose $A \in \R^{n \times n}$ and $b \in \R^{n \times 1}$ is given and $A$ is invertible. Then solve $Ax = b$.
+    \item[2.] Given $A \in \R^{n \times m}$ with $n > m$ and $b \in \R^n$, solve $Ax = b$.
+    \item[3.] $A \in \C^{n \times n}$ is given. Find $\lambda \in \C$ and $x \in \C^n$, $x \neq 0$, such that $Ax = \lambda x$.  
+\end{itemize}
+
+There are direct and iterative methods. Sometimes $A$ is large, but sparse, and iterative methods make a little more sense. Problems of type 3 must be iterative by nature. 
+
+\newpar
+
+\begin{example} 
+    Consider the temperature along a wire. $0 \leq x \leq 1$ with varying insulation thickness given by $u(x, t)$. We have $u_t = u_{xx} - f(x)$, with the initial condition $u(x, 0) = u_0(x)$. Furthermore, $u(0, t) = \alpha$ and $u(1, t) = \beta$. Is there a steady state temperature distribution along the wire?
+    \newpar
+
+    Consider the steady state $v(x)$ which must solve $v''(x) = f(x)$ and $v(0) = \alpha, v(1) = \beta$. To approximate, we divide the interval $[0, 1]$ into $N + 1$ units (grid spacing $h = 1/(N + 1)$) and solve the system $v_j = v(x_j)$. We need to deduce the unknowns $v_1$, $v_2$, $\hdots$, $v_N$. For $j \in \{2, 3, \hdots, N - 1\}$, we can use the approximation 
+        \[
+            v''(x_j) \approx \frac{v_{j + 1} - 2v_j + v_{j - 1}}{h^2}.
+        \]
+    Furthermore, for $j = 1$, we can note that 
+        \[
+            v''(x_1) \approx \frac{v_2 - 2 v_1 + \alpha}{h^2} = f_1
+        \]
+    and for $j = N$, we have
+        \[
+            v''(x_N) \approx \frac{\beta - 2v_N + v_{N - 1}}{h^2} = f_N.
+        \]
+    This is a linear system of $N$ equations in $N$ unknowns $v_1, \hdots, v_N$. This is alinear system of $N$ equations in $N$ unknowns $v_1, \hdots, v_N$:
+        \[ 
+            \begin{pmatrix}
+                -2 & 1 & 0 & \hdots & 0 \\
+                1 & -2 & 1 & \hdots & 0 \\
+                \vdots & \vdots & \vdots & \vdots & \vdots \\
+                0 & \hdots & 1 & -2 & 1 \\
+                0 & \hdots & 0 & 1 & -2 
+            \end{pmatrix}
+            \begin{pmatrix}
+            v_1 \\
+            v_2 \\
+            \vdots \\
+            v_{N - 1} \\
+            v_{N}
+            \end{pmatrix} = 
+            \begin{pmatrix}
+                h^2 f_1 - \alpha \\
+                h^2 f_2 \\
+                \vdots \\
+                h^2 f_{N - 1} \\
+                h^2 f_N - \beta
+            \end{pmatrix}
+        \]
+    This matrix is very sparse (fewer than 3$N$ nonzero entries) which are clustered along the diagonal. This is known as a \textit{tridiagonal} matrix. This system can be solved for given RHS in $O(n)$ operations using Gaussian elimination.
+\end{example}
+
+Fact: in the previous example, $M_N^{-1}$ is not sparse at all. In fact, it is almost completely dense. Consider an $N \times N$ matrix $A$ and multiply by an $N \times 1$ vector $w$. Then, computing $Aw$ involves $O(N^2)$ operations, so we will basically never form $A^{-1}$ when solving $Ax = b$. 
+\newpar
+
+We will look at Gaussian elimination, QR factorization, etc as direct methods, which we will interpret as matrix factorization. 
+\newpar
+
+A few simple facts:
+\begin{itemize}[noitemsep]
+    \item $A \in \R^{n \times m}$, $A: \R^m \mapsto \R^n$.
+    \item $(Ax)_i = \sum_j A_{ij} x_j$.
+    \item If $A_i$ refers to the $i$=th column of a matrix, then 
+        \[Ax = x_1 A_1 + x_2 A_2 + \hdots + x_m A_m \]
+\end{itemize}
+
+\begin{definition}
+    A \textit{norm} on $\C^n$ is a function $| \cdot | : \C^n \to \R^+$ satisfying:
+    \begin{itemize}[noitemsep, nolistsep]
+        \item[1.] $|x| \geq 0$ and $|x| = 0$ iff $x = 0$.
+        \item[2.] For any $c \in \C$ and $x \in \C^n$, $|cx| = |c||x|$. 
+        \item[3.] $|x + y| \leq |x| + |y|$.   
+    \end{itemize}
+\end{definition}
+\begin{definition}
+    We can consider the \textit{Euclidean norm} $|x|_2 = \sqrt{|x_1|^2 + \hdots + |x_n|^2}$. Furthermore, the \textit{p-norm} is defined by $|x|_p = \left(|x_1|^p + \hdots + |x_n|^p\right)^{1/p}$ for $1 \leq p \leq \infty$ ($p = 1$ is useful). Finally, $|x|_\infty = \max_{j = 1, \hdots, n} |x_j|$.  
+\end{definition}
+
+\begin{definition}
+    Take $A \in \R^{n \times m}$. Then $||A||_F = \sqrt{\sum_{i, j} A_{i, j}^2}$. This is the \textit{Frobenius (Hilbert-Schmidt) norm}.
+\end{definition}
+
+\begin{definition}
+    If $A \in \R^{n \times m}$, we can consider the \textit{induced p-norm} defined by considering 
+        \[\max_{x \neq 0} \frac{|Ax|_p}{|x|_p} = \max_{|x| = 1}|Ax|_p.\]
+\end{definition}
+
+One can note that $p = 1$ and $ p = \infty$ are easier to work with than $p = 2$. First, let us consider the induced $p = 1$ norm of a matrix. Note that 
+    \begin{align*}
+        |Ax|_1 &= |A_1 x_1 + A_2 x_2 + \hdots + A_m x_m | \\
+        &\leq |A_1 x_1| +  |A_2 x_2| + \hdots + |A_m x_m| \\
+        &= |x_1| |A_1| + |x_2||A_2|+ \hdots + |x_m||A_m| \\
+        &\leq |a_1| |A_{i_*}| + |a_2| |A_{i_*}| + \hdots + |a_n| |A_{i_*}|
+    \end{align*}
+where $|A_{i_*}| = \max_{1 \leq j \leq m} |A_j|$. Thus, 
+    \[
+        |Ax| \leq \underbrace{(|x_1| + \hdots + |x_m|)}_{\text{sum} = 1} |A_{i_*}| = |A_{i_*}|
+    \]
+so we get the bound $|A|_1 \leq |A_{i_*}|$. It is easy to see the upper bound is attained by chosing an appropriate standard basis vector, so it follows that $|A|_1 \leq |A_{i_*}|$. 
+
+\section*{29 August 2024}
+First, we can talk a little more about the Frobenius norm on $A \in \C^{n \times m}$. We can note that 
+    \begin{align*}
+        \left(\sum_{i, j} |A_{i,j}|^2 \right)^{1/2} = \sqrt{\sum_{i, j} \overline{A_{i, j}} A_{{i, j}}} = \sqrt{\sum_{i, j}(A^{*})_{j, i}A_{i, j}} = \sqrt{\sum_j(A^* A)_{j, j}} = \sqrt{\tr(A^*A)}.
+    \end{align*}
+Furthermore, we discussed the \textit{induced norm} defined on $1 \leq p \leq \infty$ defined by 
+    \begin{align*}
+        ||A||_p = \max_{|x|_p = 1} |Ax|_p = \max_{x \neq 0}.
+    \end{align*}
+Recall $|| \cdot ||_1$ and $|| \cdot ||_\infty$ are often the easiest induced matrix norms to compute. We have already seen how to compute the $|| \cdot ||_1$ norm so now we will attempt to compute $|| \cdot ||_\infty$. We have
+    \begin{align*}
+        |(Ax)_i| = |\sum_j A_{i, j} x_j| \leq \sum_j |A_{i, j}| |x_j| \leq \sum_j |A_{i, j}|.
+    \end{align*}
+This is equal to the absolute row sum along the row $i$. Thus, 
+    \begin{align*}
+        |Ax|_{\infty} = \max_i|(Ax)_i| \leq \max_i \sum_j |A_i, j|.
+    \end{align*}
+It is easy to find a value of $x$ such that the inequality turns into an equality.
+\newpar
+
+Finally, we can talk about the induced 2-norm on matrices. 
+We have the following result:
+\begin{theorem}
+    If $A \in \C^{n \times m}$, then $|| A ||_2 = \sqrt{\lambda}$, where $\lambda$ is the largest eigenvalue of $A^* A$. 
+\end{theorem}
+
+\begin{proof}
+Suppose $A \in \C^{n \times m}$. Then, by definition,
+    \begin{align*}
+        ||A||^2_2 = \max_{|x|_2 = 1} |Ax|^2_2,
+    \end{align*}
+and we can write $|Ax|_2^2 = \langle Ax, Ax\rangle = \langle A^* A x, x \rangle$ under the usual inner product. Thus, our optimization problem turns into 
+    \begin{align*}
+        ||A||_2^2 = \max_{|x|_2 = 1} \langle A^* A x, x \rangle
+    \end{align*}
+where $A^* A \in \C^{m \times M}$. Now, $A^* A$ is Hermitian, so $A^*A$ is \textit{unitarily diagonizable} (eigenvectors can be chosen to form an orthonormal basis). Moreover, all eigenvalues are real and positive. Take $\{v_1, \hdots, v_m\}$ to be the orthonormal basis satisfying $A^*A v_j = \lambda j v_j$. If we take $V = (v_1^T, \hdots, v_n^T)$ and 
+    \begin{align*}
+        \Sigma = \begin{pmatrix}
+        \lambda_1 & 0 & \hdots & 0 \\
+        0 & \lambda_2 & \hdots & 0 \\
+        \vdots & \vdots & \vdots & \vdots \\
+        0 & 0 & \hdots & \lambda_m
+        \end{pmatrix},
+    \end{align*}
+then $A^* A = V \Sigma V^*$. Thus, 
+\begin{align*}
+    |Ax|_2^2 &= \max_{|x|_2 = 1} \langle A^* Ax, x\rangle = \max_{|x|_2 = 1} \langle \Sigma V^* x, V^*x \rangle.
+\end{align*} 
+
+Since $V^* = V^{-1}$, it follows that 
+    \begin{align*}
+        \langle V^* x, V^*x\rangle = \langle x, VV^* x \rangle = \langle x, x\rangle,
+    \end{align*}
+so if we set $y = V^*x$, it follows that 
+\begin{align*}
+    \max_{|x|_2 = 1} \langle \Sigma V^*x, V^*x\rangle &= \max_{|y_1|^2 + \hdots + |y_m|^2 = 1} \langle \Sigma_y, y \rangle \\
+    &= \max_{|y_1|^2 + \hdots + |y_m|^2} \left(\lambda_1 |y_1|^2 + \lambda_2 |y_2|^2 + \hdots + \lambda_m |y_m|^2 \right) \\
+    &= \max_j \lambda_j.
+\end{align*}
+
+From this, we can conclude that $||A||_2^2$ is the largest eigenvalue of $A^* A$. 
+\end{proof}
+
+
+\newpar
+Suppose $A \in \C^{m \times m}$ and suppose that $A$ is diagonalizible. Then, $A = M D M^{-1}$ for some matrix $M$ and diagonal matrix $D$. If $A = A^*$, then $A$ is unitarily diagonalizible, so we can write $A = UDU^*$ for some unitary matrix $U$. Singular value decomposition generalizes this to all matrices $A \in \C^{n \times m}$.
+
+\begin{definition}
+    If $A \in \C^{n \times m}$, the \textit{Singular Value Decomposition (SVD)} of $A$ is of the form
+        $$A = U \Sigma V^*$$
+    where $V$ has dimensions $ m \times m$ and unitary, $\Sigma$ is diagonal and has dimensions $n times m$, and $U$ has dimensions $N \times n$ and is unitary.
+\end{definition}
+
+Assuming SVD exists, we can find the SVD by noting first that
+    \begin{align}
+        A^* A = M_1 D_1 M_1^*
+    \end{align} 
+where $M_1$ is unitary, $D_1$ is diagonal and has positive entries, and all matrices have dimensions $m \times m$. Furthemore, 
+    \begin{align}
+        AA^* = M_2 D_2 M_2^{-1},
+    \end{align}
+where $M_2$ is unitary and $D_2$ is diagonal and positive. By substituting $A = U \Sigma V^*$ into (1), we can conclude that 
+    \[
+        A^* A = V \Sigma^T U^* U \Sigma V^* = V \Sigma^T \Sigma V^* = M_1 D_1 M_1^*
+    \]
+Thus, if $\Sigma$ is diagonal with entries $\sigma_1, \hdots, \sigma_k$ with $K = \min{n, m}$, then $\sigma_j = \sqrt{\lambda_j}$ where $\lambda_j$ are eigenvaleus of $A^*A$. Furthermore, columns of $V$ are eigenvectors $v_1, \hdots, v_m$ of $A^* A$. To find $U$, we note that 
+    \[
+        Av_j = U \Sigma V^{-1} v_j = U \Sigma e_j = U \Sigma_j
+    \]
+where $e_j$ is the $j$-th standard basis vector and $\Sigma_j$ is the $j$-th column. Since $U \Sigma_j = \sigma_j U e_j = \sigma_j U_j$, it follows that $Av_j = \sigma_j U_j$. This completes the algorithm to find the SVD of a matrix $A$. 
+\end{document}
