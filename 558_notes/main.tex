@@ -1,0 +1,1276 @@
+\documentclass{article}
+\input{include.tex}
+
+% Graphics path
+\graphicspath{{./figs}}
+
+% invert color. change \mdfdefinestyle{problemstyle} command if submitting document
+\pagecolor{vscodecolor}
+\color{white}
+
+\title{Math 558 - Applied Nonlinear Dynamics}
+\author{Autumn 2024}
+
+\begin{document}   
+\maketitle
+\frenchspacing
+
+\section*{27-29 August 2024}
+Consider a vector-valued function $y: \R \to \R^d$ and let $y'(t) = f(t, y(t))$, $f : \R \times \R^d \to \R^d$. Let $f$ be supplied with initial condition $y(t_0) = \alpha \in \R^d$. Our focus will remain on these types of differential equations.
+
+\newpar
+Remark: We can note that $y^{(n)}(t) = f(t, y(t), y'(t), \hdots, y^{(n - 1)}(t))$. We can introduce auxiliary variables $z_0(t) = y(t)$, $z_1(t) = y'(t)$, $\hdots$, $z_{n - 1}(t) = y^{(n - 1)}(t)$. Then, we get the natural relations $z_0' = z_1$, $z_1' = z_2$, $\hdots$, $z'_{n - 2} = z_{n - 1}$, and $z'_{n - 1} = f(t, z_0, z_1, \hdots, z_{n - 1})$, so in principle the aforementioned equation can be reduced into a system of first-order equations. 
+
+\newpar
+If $y' = f(y)$ (that is, $f$ does not depend on $t$), then the equation is said to be \textit{autonomous}. In general, the nonautonomous case can be reduced to the autonomous case by introducing the auxiliary variable $z$ which satisfies $z' = 1$ and $z(t_0) = t_0$. 
+
+\newpar 
+Now, let us consider the question of existence and uniqueness of solutions. We can consider the equation $y' = 1+ y^2$ with the initial condition $y(0) = 0$. Then, our equation can easily be solved using separation of variables, resulting in the equation $\arctan(y) = t + C$. By matching the boundary value conditions, we can deduce that $y(t) = \tan(t)$; however, this is only valid for $-\pi/2 < t < \pi/2$, so we may not have global existence for every ODE. 
+\newpar
+
+Now, let us consider the ODE $y' = \sqrt{|y|}$ with the initial condition $y(0) = 0$. By separating and integrating, we get that $y(t) = \frac{1}{4} t^2$ - which is a solution; however, there are uncountably many solutions. Chose any $a > 0$ and define 
+    \[
+        y_a(t) = 
+        \begin{cases}
+            0, \quad& 0 \leq t \leq a \\
+            \displaystyle\frac{1}{4}(t - a)^2 \quad& t \geq a
+        \end{cases}
+    \]
+These functions are not twice-differentiable; however, $y \in C^{1, 1}$ (that is, it's derivative is Lipshitz). 
+
+\newpar
+To formulate the Existence and Uniqueness theorems, we need the following results and definitions:
+
+
+\begin{theorem}[Contraction mapping principle (Banach fixed pt. theorem).]{}
+    Let $X$ be a normed, complete vector space. let $S \subseteq X$ be a closed subset. Let $\Psi : S \to S$. Assume there is a scalar value $\theta \in [0, 1)$ such that $|\Psi(x) - \Psi(y)| \leq \theta|x - y|$ for all $x, y \in S$. Then, $\Psi$ has a fixed point $p \in S$. That is, there exists $p \in S$ such that $\Psi(p) = p$. Moreover, if $x_0 \in S$, the iteration $x_{n + 1} = \Psi(x_n)$ converges to $p$: $\displaystyle\lim_{n \to \infty} x_n = p$. In fact, $p$ is unique and 
+        \[
+            |x_n - p| \leq \frac{\theta^n}{1 - \theta}|x_1 - x_0|.
+        \]
+\end{theorem}
+\begin{proof}
+    First, we can note that for any $j > 1$,
+        \[|x_{j + 1} - x_j| = |\Psi(x_j) - \Psi(x_{j - 1}) | \leq \theta |x_j - x_{j - 1}| \leq \theta^2 |x_{j - 1} - x_{j - 2}| \leq \hdots \leq \theta^j|x_1 - x_0|.\]
+    Now, we let $n \geq m$, with both $n$ and $m$ very large. By observing the natural telescoping sum, we get 
+    \begin{align*}
+        x_n - x_m &= \sum_{j = m}^{n - 1} (x_{j + 1} - x_j) \leq \sum_{j = m}^{n - 1} \theta^j|x_1 - x_0| \leq \theta^m |x_1 - x_0| \sum_{j =0}^\infty \theta^j = \frac{\theta^m}{1 - \theta} | x_1 - x_0|
+    \end{align*}
+    by the geometric sum formula. This implies $\{x_n\}$ is Cauchy, so there is a limit $p \in X$ such that $\displaystyle\lim_{n \to \infty} x_n = p$. Since $S$ is closed, $p \in S$. By taking $n \to \infty$, we can deduce that 
+        \[
+            |p - x_m| \leq \frac{\theta^m}{1 - \theta}|x_1 - x_0|.
+        \]
+    Now, we can show the uniqueness of $p$. Suppose for the sake of contradiction that $p, q \in S$, $p \neq q$. Then $\Psi(p) = p$ and $\Psi(q) = q$. Then, $|p - q| = |\Psi(p) - \Psi(q)| \leq \theta | p - q|$, so $|p - q| = 0$, thus $p = q$. 
+\end{proof}
+
+\begin{definition}
+    For some $A \subseteq \R \times \R^d$ and $f : A \to \R^d$ is \textit{Lipshitz} if there exists a constant $L$ such that 
+        \[
+            |f(t, y) - f(t,z)| \leq L|y - z|
+        \]
+    for all $(t, y), (t, z) \in A$. If $f$ is continuously differentiable with respect to $y$ on $A$ and $A$ is compact, then $f$ is Lipshitz.
+\end{definition}
+
+
+\begin{theorem}[Theorem (Hartman - Grobman)]{}
+    Define $Q_{a, b} =  \{(t, y) : \, t_0 \leq t \leq t_0 + a, \alpha_j = b \leq y_j \leq \alpha_j + b\}$. Let $f: \R \times R^d$ be continuous and Lipshitz in $y$ variable on $Q_{a, b}$. Then, there exists $\epsilon > 0$ such that there is a solution to the ODE system $y' = f(t, y)$, $y(t_0) = \alpha$ for the time interval $t_0 \leq t \leq t_0 + \epsilon$.  
+\end{theorem}
+\begin{proof}
+    Let us define
+    \begin{align*}
+        M &= \max_{\substack{t, y \in Q_{a, b}\\ j}}|f_j(t, y)| < \infty, \\
+        L &= \max_{\substack{(t, y), (t, z) \in Q_{a, b} \\ y \neq z \\ j}} \frac{f_j(t, y) - f_j(t, z)}{|y - z|} < \infty.
+    \end{align*}
+    Let $\epsilon = \frac{1}{2d}\min \left\{a, \frac{b}{M}, \frac{1}{L} \right\}.$ Let $X_\epsilon = C([t_0, t_0 + \epsilon], \R^d)$ be a vector space. Furthermore, if $\phi \in X_\epsilon$, we can define the norm of $\phi$ to be 
+    \[
+        ||\phi|| = \max_{\substack{t_0 \leq t \leq t_0 + \epsilon \\ j = 1, \hdots, d}}|\phi_j(t)|.
+    \]
+    Since the uniform limit of continuous functions is continuous, the space $X_\epsilon$ is complete. Let $S = \{\phi \in X_\epsilon : (t, \phi(t)) \in Q_{\epsilon, b} \t{ for } t_0 \leq t \leq t_0 + \epsilon\}$. Now, let us define the mapping $\Psi$ by 
+        \[
+            \Psi[y](t) = \alpha + \int_{t_0}^t f(s, y(s)) \, \t{d}s.
+        \]
+    Clearly, $\Psi : X_\epsilon \to X_\epsilon$. Now, we can note that 
+        \begin{align*}
+            |\Psi[\phi_j](t) - \alpha_j| \leq  \int_{t_0}^t \left|f_j(s, \phi(s))\right| \, \t{d}s &\leq (t - t_0) M \\
+            &\leq \epsilon M \leq b.
+        \end{align*}
+    Thus, we get $\Psi : S \to S$. Finally, we need to show that $\Psi$ is a contraction. Consider $\phi, \psi \in S$. Now, we can note that 
+        \begin{align*}
+            |\Psi[\phi_j](t) - \Psi[\psi_j](t)| &\leq \int_{t_0}^t \left| f_j(s, \phi(s)) - f_j(s, \psi(s))\right|\, \t{d}s \\
+            &\leq \int_{t_0}^t L |\phi(s) - \psi(s)| \, \t{d}s\\
+            &\leq \max_{t_0 \leq s \leq t_0 + \epsilon} | \phi(s) - \psi(s) | \cdot L\epsilon.
+        \end{align*}
+    For $t_0 \leq t \leq t_0 + \epsilon$, we have 
+        \begin{align*}
+            ||\Psi[\phi] - \Psi[\psi]|| &= \max_{t_0 \leq t \leq t_0 + \epsilon} | \Psi[\phi]_j (t) - \Psi[\psi]_j(t)| \\
+            &\leq L \epsilon \cdot \max_{t_0 \leq s \leq t_0 + \epsilon}|\phi(s) - \psi(s)| \\
+            &\leq \frac{1}{2} \max_{t_0 \leq s \leq t_0 + \epsilon} |\phi(s) - \psi(s)| \\
+            &\leq \frac{1}{2}\max_{\substack{t_0 \leq s \leq t_0 + \epsilon \\ 1 \leq j \leq d}} |\phi_j(s) - \psi_j(s)|. 
+        \end{align*}
+    This implies $||\Psi[\phi] - \Psi[\phi] || \leq \frac{1}{2} ||\phi - \psi ||$. Thus, by the contraction mapping principle, there exists a $y \in S$ such that $\Psi[y] = y$ such that 
+        \[
+            y(t) = \alpha + \int_{t_0}^t f(s, y(s))\, \t{d}s.
+        \]
+    By differentiating component-wise, we can deduce that $y'(t) = f(t, y(t))$ with $y(t_0) = \alpha$ for $t_0 \leq t \leq t_0 + \epsilon$. 
+\end{proof}
+
+
+
+% \begin{theorem}[Theorem (Existence and Uniqueness).]
+%     Consider $y' = f(t, y)$ with the initial value condition $y(t_0) = \alpha$. If $f$ is continuous on $Q_{a, b}$ and Lipshitz in $y$ on $Q_{a, b}$, then there exists a solution to the IVP on $t_0 \leq t \leq t_0 + \epsilon$ for some $\epsilon > 0$ ($\epsilon$ may be less than $a$). Furthrmore, the solution along this interval is unique. 
+% \end{theorem}
+% \begin{proof}
+%     First, we integrate the equation. Doing so, we get
+%         \[
+%             y(t) - y(t_0) = \int_{t_0}^t y'(s) \, \t{d}s = \int_{t_0}^t f(s, y(s)) \t{d}s,
+%         \]
+%     so the differential equation is equivalent to solving the integral equation 
+%         \[
+%             y(t) = \alpha + \int_{t_0}^t f(s, y(s)) \, \t{d}s
+%         \]
+%     where $\alpha = y(t_0)$ (we are integrating component-wise when we are integrating a vector-valued function). We approach the solution of the integration equation via \textit{fixed-point iteration}. Suppose we start with an inital guess for the solution $y_0(t)$, and then generate $y_1(t), y_2(t)$, $\hdots$, $y_n(t)$. Then, we get the next iteration by evaluating
+%         \[
+%             y_{n + 1}(t) = \alpha + \int_{t_0}^t f(s, y_n(s)) \, \t{d}s.
+%         \]
+%     Typically, we choose the initial guess to be the constant function $y_0(t) = \alpha$. We desire to prove that this iteration converges to a unique solution of the IVP over a small enough interval. 
+%     \newpar
+
+%     Let $\Psi[y](t) = \alpha + \int_{t_0}^t f(s, y(s)) \, \t{d}s$. Then, $y_{n + 1} = \Psi[y_n]$. If you find $y(t)$ such that $y = \Psi[y]$ (that is, $y$ is a fixed point of the map $\Psi$), then you will have found a solution to the IVP. 
+% \end{proof}
+
+\begin{example}
+    The following example demonstrates fixed point iteration. Consider the differential equation $y' = y$ with the initial condition $y(0) = 1$. Clearly, $y(t) = e^t$, but we will show this using fixed-point iteration. Let $y_0(t) = 1$. Then, we can note that 
+    \begin{align*}
+        y_1(t) &= \Psi[y_0]{t} = 1 + \int_{0}^t y_0(s) \, \t{d}s = 1 + \int_{0}^t 1 \, \t{d}s = 1 + t.
+    \end{align*}
+    Doing this agian, we can deduce 
+        \[
+            y_2(t) = \Psi[y_1](t) = 1 + \int_0^t (1 + s) \, \t{d}s = 1 + t + \frac{t^2}{2}.
+        \]
+    Continuing onwards, we arrive at the Taylor series expansion for $e^t$ (which is easy to show). 
+\end{example}
+
+
+
+\begin{theorem}[Lemma.]{}
+    \textit{Gromwall Inequality:} Let $y(t), g(t)$ be continuous, non-negative functions for $t = t_0$. Let $A \geq 0$. If 
+        \[
+            y(t) \leq A + \int_{t_0}^t g(s)y(s) \t{d}s
+        \]
+    for $t \geq t_0$, then it follows that 
+        \[
+            |y(t)| \leq A \exp \left( \int_{t_0}^t g(s) \, \t{d}s \right)
+        \]
+    for all $t \geq t_0$. 
+\end{theorem}
+\begin{proof}
+    Let 
+    \[
+        z(t) = A + \int_{t_0}^t g(s) y(s) \, \t{d}s.
+    \]
+    Then, $y(t) \leq z(t)$. And furthermore, $z'(t) = g(t)y(t) \leq g(t)z(t)$. For now, let us assume that $A > 0$. Thus, we get $z'(t) / z(t) \leq g(t)$, and since $z$ never vanishes, we can deduce 
+        \[
+         \dv{}{t}\left\{\log(z(t)) - \int_{t_0}^t g(s) \, \t{d}s \right\} = 0.
+        \]
+    Thus, 
+        \[
+            \log(z(t)) - \int_{t_0}^t g(s) \, \t{d}s  \leq \log(A).
+        \] 
+    From this, finally arrive at 
+        \[
+            A \exp \left(\int_{t_0}^t g(s) \t{d}s \right) \geq z(t) \geq y(t).
+        \]
+    It is easy to verify this is true even when $A = 0$. 
+\end{proof}
+ 
+
+Note: if 
+    \[
+        y(t) = y(t_0) + \int_{t_0}^t g(s)y(s) \t{d}s,
+    \]
+it follows that $y'(t) = g(t)y(t)$. This is an easy differential equation to solve, and it turns out that 
+    \[
+        y(t) = y(t_0) \exp \left( \int_{t_0}^t g(s) \, \t{d}s\right),
+    \]
+which is precisely the bound we were looking for.  
+
+\section*{3 September 2024}
+
+\begin{theorem}[Theorem (Uniqueness of Solutions and Continuous Dependence on Initial Disc).]{}
+    The solution guaranteed by Hartman-Grobman is unique.
+\end{theorem}
+
+\begin{proof}
+    Asume $y(t)$ and $z(t)$ are two solutions:
+        \[
+            \begin{cases}
+                y'(t) = f(t, y(t)), \quad t_0 \leq t \leq T \\
+                y(t_0) = \alpha
+            \end{cases}
+        \]
+    and 
+        \[
+            \begin{cases}
+                z'(t) = f(t, z(t)), \quad t_0 \leq t \leq T \\
+                z(t_0) = \beta.
+            \end{cases}
+        \]
+    Assume that $f(t, \xi)$ is continuous, and also that $\pdv{f}{\xi}$ is also continuous. Then, 
+    \begin{align*}
+        y(t) &= \alpha + \int_{t_0}^t f(s, y(s)), \t{d}s \\
+        z(t) &= \beta + \int_{t_0}^t f(s, y(s)), \t{d}s.
+    \end{align*}
+
+    Thus, we can conclude that 
+        \[
+            |y(t) - z(t) | \leq |\alpha - \beta| + \int_{t_0}^t |f(s, y(s)) - f(s, z(s)) | \, \t{d}s \leq |\alpha - \beta| + \int_{t_0}^t L|y(s) - z(s) | \, \t{d}s.
+        \]
+    where we used 
+        \[
+            L = \max_{\substack{(t, y), (t, z) \in B \\ y \notin z}} \frac{|f(t, y) - f(t, z)|}{|y - z|}.
+        \]
+
+    By Gronwall inequality, we can deduce that 
+        \[
+            |y(t) - z(t)| \leq A \exp(L(t - t_0)),
+        \]
+    which is true for $t_0 \leq t \leq T$. 
+\end{proof}
+
+Given a solution to 
+    \[
+        \begin{cases*}
+            y' = f(t, y) \\
+            y(t_0) = \alpha,
+        \end{cases*}
+    \]
+$f$ is continuous and $\pdv{f}{y}$ is continuous. Let the maximum time of existence, $t_*$, be defined as 
+    \[
+        t_* = \sup \{T > t_0 : \t{ a solution exists on } t \in [t_0, T) \}.
+    \]
+
+\begin{theorem}[Claim.]{}
+    If $t_* < \infty$, then the solution cannot be bounded on $[t_0, t_*)$.
+\end{theorem}
+\begin{proof}
+    Suppose the solution remains bounded on $[t_0, t_*)$ (that is, $\sup|y(t)| = M < \infty$ on $t_0 \leq t < t_*$), and that $t_* < \infty$. Let $B = t_0 \leq t \leq t_*$ and $|y| \leq M$. Furthermore, let $A = \max_{(t, y) \in B} |f(t, y)|$. We claim that $\lim_{t \to t_*^{-}} y(t)$ exists. Take $t_1 > t_2 \to t_*^{-1}$. Then, 
+    \[
+        |y(t_1) - y(t_2)| \leq \int_{t_1}^{t_2} |f(s, y(s))| \, \t{d}s \leq A(t_1 - t_2) \to 0
+    \]
+    as $t_1, t_2 \to t_*^{-}$. Now, we apply the existence theorem for $y' = f(t, y)$, $y(t_*) = \lim_{t \to t_*^{-}} y(t)$
+\end{proof}
+
+\begin{example}
+    Consider the equations
+    \begin{align*}
+        y_1' &= -y_2^2 \\
+        y_2' &= y_1 y_2 - y_2.
+    \end{align*}
+
+    We now discuss how long solutions exist in terms of the initial data
+    \[
+        \begin{cases}
+            y_1(0) = \alpha_1 \\
+            y_2(0) = \alpha_2.
+        \end{cases}
+    \]
+
+    Suppose solutions exists on $[0, T)$. By adding up the solutiosn and cancelling, we can deduce 
+    \[
+        \frac{1}{2} \dv{t} (y_1^2 + y_2^2) = -y_2^2 \leq 0,
+    \]
+
+    so $y_1^2 + y_2^2$ is a decreasing function on $|y_1|, |y_2| \leq \sqrt{\alpha_1^2 + \alpha_2^2}$ on $[0, T)$. This implies that all solutions exist for all time. 
+\end{example}
+
+
+Now, let us consider a general linear system $y'(t) = A(t) y(t) + f(t)$. $A(t)$ is a $n \times n$ matrix and $f(t)$ is a $n \times 1$ vector. Both are continuous. 
+
+\begin{theorem}[Claim.]{}
+    For systems of the form depicted above, all solutions exist for all time. 
+\end{theorem}
+\begin{proof}
+    Note that $A(t)$ and $f(t)$ being continuous suffices since continuity implies Lipshitz continuity along any bounded interval. Let a solution $y(t)$ exist on $[t_0, T)$. Then, 
+    \[
+        y(t) = y(t_0) + \int_{t_0}^t |A(s)y(s) + f(s)| \, \t{d}s \leq |y(t_0)| + \int_{t_0}^t ||A(s)||_2 |y(s)|_2 + |f(s)|_2 \, \t{d}s.
+    \] 
+
+    From this, we can conclude that 
+    \[
+        |y(t)|_2 \leq |y(t_0)|_2 + \int_{t_0}^T |f(s)|_2 \, \t{d}s + \int_{t_0}^t ||A(s)||_2 |y(s)|_2 \, \t{d}s.
+    \]
+
+    By Gronwall inequality, we have 
+    \[
+        |y(t)|_2 \leq \left(|y(t_0)|_2 + \int_{t_0}^T |f(s)|_2 \, \t{d}s\right) \exp \left(\int_{t_0}^t ||A(s)||_2 \, \t{d}s \right).
+    \]
+\end{proof}
+
+\subsection*{Linear Algebra Digression.}
+
+Now, let us consider $A \in \C^{d \times d}$ and let $\lambda$ be an eigenvalue of $A$. Recall that if $v$ is an eigenvector associated with $\lambda$ if $v \neq 0$ and $(A - \lambda I) v = 0$. 
+
+\begin{definition}{}
+    $v \neq 0$ is a \textit{generalized eigenvector} associated with the eigenvalue $\lambda$ if 
+        \[
+            (A - \lambda I)^n v = 0
+        \]
+    for some $n \in \N$. 
+\end{definition}
+
+\begin{definition}{}
+    If $v \neq 0$ is a generalized eigenvector with ccorresponding eigenvalue $\lambda$, let 
+        \[
+            \text{Index}(v) = \t{ Smallest } n \t{ for which } (A - \lambda I)^n v = 0.
+        \]
+\end{definition}
+
+\begin{theorem}[Claim.]{}
+    Let $v$ be a generalized eigenvector with eigenvalue $\lambda$. Assume $\t{Index}(v) = n$ . Then, $v$, $(A \lambda I)v$, $(A - \lambda I)^2 v$, $\hdots$, $(A - \lambda I)^{n - 1} v$ are linearly independent. 
+\end{theorem}
+\begin{proof}
+    Assume they are not linearly independent. We can find scalars $c_0, \hdots, c_{n - 1}$, with not all $0$, such that 
+        \[\sum_{j = 0}^{n - 1} c_j (A - \lambda I)^j v = 0.\]
+    Let $c_i$ be the first $c$ that is not zero. That is, $c_0 = c_1 = \hdots = c_{i - 1} = 0$, but $c_{i \neq 0}$. Then, 
+        \[\sum_{j = i}^{n - 1} c_j (A - \lambda I)^j v = 0.\]
+    Now, we multiply both sides by $(A - \lambda I)^{n - i - 1}$. Then, it follows that 
+        \[
+            c_i (A - \lambda I)^{ n - 1} v + \t{ a bunch of terms which vanish }= 0,
+        \]
+    which is a clear contradiction since $v$ has index $n$. 
+\end{proof}
+
+
+\begin{theorem}[Corollary.]{}
+    $\t{Index}(v) \leq d$. 
+\end{theorem}
+
+\begin{definition}{}
+    For $\lambda$ an eigenvalue of $A$, let $V(\lambda)$ be the \textit{generalized eigenspace} corresponding with $\lambda$. In particular, 
+        \[
+            V(\lambda) = \t{Span} \{\t{all generalized eigenvectors with eigenvalue} \lambda \}.
+        \]
+\end{definition}
+
+\begin{definition}{}
+    $\t{Index}(V(\lambda)) = $Largest index of any $v \in V(\lambda), v\neq 0$. 
+\end{definition}
+
+Some notation: $\t{r}(\lambda) = \t{Index}(V(\lambda))$. 
+
+
+\begin{theorem}[Claim.]{}
+    $\t{Range}((A - \lambda I)^{r(\lambda)}) \cap \ker((A - \lambda I)^{r(\lambda)}) = \{0\}$.
+\end{theorem}
+\begin{proof}
+    Assume $v \in \t{Range} \cap \ker$. Then, $v = (A - \lambda I)^{r(\lambda)}v = (A - \lambda I)^{2 r(\lambda)}y = 0$.  Suppose $v \neq 0$. This would imply $y \neq 0$. But $y \in V(\lambda)$, and yet $(A - \lambda I)^{r(\lambda)} y \neq 0$. And thus we have arrived at a contradiction. 
+\end{proof}
+
+
+\begin{theorem}[Claim.]{}
+    $\C^d = \t{Range}((A - \lambda I)^{r(\lambda)}) \oplus \ker( (A - \lambda I)^{r(\lambda)}).$
+\end{theorem}
+\begin{proof}
+    $\dim(\t{Range}) + \dim(\ker) = d$.
+\end{proof}
+
+\begin{theorem}[Claim.]{}
+    $\t{Range}((A - \lambda I)^{r(\lambda)})$ and $\ker((A - \lambda I)^{r(\lambda)})$ are invariant subspaces for $A$ and any polynomial $p(A)$ in $A$. 
+\end{theorem}
+\begin{proof}
+    If $x\in \t{Range}(A - \lambda I)^{r(\lambda)}$ and $x = (A - \lambda I)^{r(\lambda)}y$ for some $y$, then 
+        \[
+            p(A) x = p(A) (A - \lambda I)^{r (\lambda)}y = (A - \lambda I)^{r(\lambda)}p(A) y.
+        \]
+    The same proof works for the kernal. 
+\end{proof}
+
+
+\section*{5 September 2024}
+
+\begin{theorem}[Claim.]{}
+    Let $\{v_1, v_2, \hdots, v_{k}\}$ be a basis for $V(\lambda)$. Complete that to a basis $\{v_1, v_2, \hdots, v_d \}$ of $\C^d$. Let $M = (v_1, v_2, \hdots, v_d)$. Then 
+    \[
+        M^{-1} A M =
+        \begin{pmatrix}
+            A_1 & 0 \\
+            0 & A_2,
+        \end{pmatrix}
+    \] 
+    where $A_1$ is a $k \times k$ matrix and $A_2$ is $(d - k) \times (d- k)$. Therefore, $p_A(\xi)$ = characteristic polynomial of $A$ = $p_{A_1}(\xi) \cdot p_{A_2}(\xi)$.
+\end{theorem}
+\begin{proof}
+    If $1 \leq j \leq k$, then $Av_j \in V(\lambda)$. Then, $M^{-1} A v_j = (a_1, \hdots, a_k, 0, 0, \hdots, 0)^T$, where the first $k$ entries may be nonzero. If $k < j$, then $(0, \hdots, 0, a_{k + 1}, \hdots, a_d)^T$. To show the second part, we can conclude that 
+    \begin{align*}
+        \det(A - \lambda I) &= \det(M^{-1}(A - \lambda I)M) \\
+        &= \det(M^{-1}AM - \lambda I).
+    \end{align*}
+    From this point, the statement in the claim follows almost immediately from the definition of a determinant.
+\end{proof}
+
+\begin{theorem}[Claim.]{}
+    Let $v \neq 0$, $Au = \mu v$, and $\mu \neq \lambda$, where $\lambda$ is also an eigenvalue of $A$. Then, $u \notin V(\lambda)$. 
+\end{theorem}
+
+\begin{proof}
+    We have $Au = \mu u$. Suppose $u \in V(\lambda)$, then $(A - \lambda I)^{r(\lambda)}u = 0$. Thus, $(\mu - \lambda)^{r(u)}u = 0$, so $\mu = \lambda$. 
+\end{proof}
+
+
+\begin{theorem}[Claim.]{}
+    Let $\lambda, \mu$ be eigenvalues of $A$, $\lambda \neq \mu$. Then, $V(\lambda) \cap V(\mu) = \{0\}$. 
+\end{theorem}
+
+\begin{proof}
+    Suppose $u \neq 0$, $u \in V(\lambda) \cap V(\mu)$. Then, $(A - \lambda I)^{r(u) -1} u$ is an eigenvector with eigenvalue $\lambda$. This is a contradiction by a previous claim.  
+\end{proof}
+
+
+\begin{theorem}[Claim.]{}
+    Let $\lambda_1, \hdots, \lambda_n$ be the distinct eigenvalues of $A$, with multiplicities $m_1, \hdots, m_n$ so that $m_1 + m_2 + \hdots + m_n = d$. Then, 
+    \[
+        \C^d = \bigoplus_{i = 1}^n V(\lambda_i)
+    \]
+    That is, $\dim V(\lambda_j) = m_j$. 
+\end{theorem}
+\begin{proof}
+    Exercise.
+\end{proof}
+
+\subsection*{Back to Differential Equations}
+Consider a system of the form 
+\[
+    \begin{cases}
+        y' = Ay \\
+        y(t_0) = \alpha,
+    \end{cases}
+\]
+
+where $A$ is a constant $d \times d$ matrix. We look for a change of variables which changes this system into a decoupled system. If $A$ is diagonalizable, $A = M D M^{-1}$, so our equation reduces to
+\[
+    \begin{cases}
+        (M^{-1}y)' = D(M^{-1}y) \\
+        y(t_0) = \alpha,
+    \end{cases}
+\] 
+ 
+and if we set $z = M^{-1} y$, our system becomes entirely decoupled, which is easy to solve. In general, we can write $z_j(t) = c_j e^{\lambda_j(t - t_0)}$ where $z_j(t_0) = c_j = (M^{-1}\alpha)_j$. 
+
+\begin{definition}{}
+    If $A \in \C^{d \times d}$, 
+        \[
+            ||A||_2 = \max_{x \neq 0} \frac{|Ax|_2}{|x|_2},
+        \]
+    and let us introduce the Frobenius norm 
+        \[
+            ||A||_F = \sqrt{\sum_{i, j = 1}^d |A_{i, j}|^2}. 
+        \]
+\end{definition}
+
+\begin{definition}{}
+    For $A \in \C^{d \times d}$, we can write 
+    \[
+        \exp(A) = \sum_{n = 0}^{\infty} \frac{A^n}{n!}.
+    \]
+\end{definition}
+We can observe that the series defined above will converge for any matrix $A$ with respect to either of the norms defined above. Indeed, 
+    \[
+        \left|\left|\sum_{n = N}^\infty \frac{A^n}{n!}\right|\right| \leq \sum_{n = N}^\infty \frac{||A^n||}{n!} \leq \sum_{n = N}^\infty \frac{||A||^n}{n!} \to 0 \t{ as } N \to \infty
+    \]
+
+\begin{theorem}[Exercises.]{}
+    \begin{itemize}
+        \item[(1)] Show $\exp(A) \exp(B) = \exp(A + B)$ if $A$ and $B$ commute. 
+        \item[(2)] Show that 
+            \[
+                \dv{t} \exp(At) = \lim_{h \to 0} \frac{\exp(A(t + h)) - \exp(A)}{h} = A \exp(At).
+            \]   
+        \item[(3)] If $A = MBM^{-1}$, then 
+            \[
+                \exp(A) = M \exp(B) M^{-1}.
+            \]
+        \item[(4)] If $D$ is diagonal, $\exp(D)$ is a diagonal matrix where each diagonal entry in $D$ is exponentiated. 
+    \end{itemize}
+\end{theorem}
+
+The upshot of all this information is that if we go back to the system $y' = Ay$ with the initial condition $y(t_0) = \alpha$, then we can write $y(t) = \exp(A(t - t_0))\alpha$. The only question is how do we compute the exponential of a defective matrix. 
+\newpar
+
+Let $\lambda_1, \lambda_2, \hdots, \lambda_n$ be the distinct eigenvalues of $A$. Let $m_1, \hdots, m_n$ be their multiplicities. Find a basis for each generalized eigenspace $V(\lambda_j)$: call it $\{y_{j, 1}, \hdots, y_{j, m_j}\}$. Observe that if $v \in V(\lambda_j)$, then 
+    \[
+        \exp(A(t - t_0))v =  \exp((A - \lambda_jI)(t - t_0))\exp(\lambda_jI(t -t_0))v = \exp((A - \lambda_jI)(t - t_0))\exp(\lambda_j(t -t_0))v.
+    \]
+Rewriting this in terms of the definition, we can conclude that 
+    \begin{align*}
+        \exp((A - \lambda_jI)(t - t_0))\exp(\lambda_j(t -t_0))v &= \exp(\lambda_j(t - t_0)) \sum_{k = 0}^{\infty} \frac{(A - \lambda_j I)^k(t - t_0)^k}{k!} v \\
+        &= \exp(\lambda_j(t - t_0)) \sum_{k = 0}^{m_j} \frac{(A - \lambda_j I)^k(t - t_0)^k}{k!} v.
+    \end{align*}
+
+
+\section*{12 September 2024}
+    \begin{theorem}[Abel's Formula.]{}
+        
+        If $\Phi(t)$ is a FSM of a differential equation, then 
+        \[
+            \dv{t} \left(\det \Phi(t)\right) = \tr(A(t)) (\det \Phi(t)).
+        \]
+    \end{theorem}
+    \begin{proof}
+        Suppose 
+        \[
+            \Phi(t) = 
+            \begin{pmatrix}
+                -- & \Phi_{1, :}(t) & -- \\
+                -- & \Phi_{2, :}(t) & -- \\
+                & \vdots & \\
+                -- & \Phi_{n, :}(t) & -- \\
+            \end{pmatrix}
+        \]
+        is a FSM. Then, we can denote that 
+        \[
+            \dv{t} \Phi(t) = 
+            \det \begin{pmatrix}
+                -- & \Phi'_{1, :}(t) & -- \\
+                -- & \Phi_{2, :}(t) & -- \\
+                & \vdots & \\
+                -- & \Phi_{n, :}(t) & -- 
+            \end{pmatrix} + \hdots + 
+            \det \begin{pmatrix}
+                -- & \Phi_{1, :}(t) & -- \\
+                -- & \Phi_{2, :}(t) & -- \\
+                & \vdots & \\
+                -- & \Phi'_{n, :}(t) & -- 
+            \end{pmatrix}.
+        \]
+
+        Since 
+        \[
+            \Phi'(t) = A(t) \Phi(t),
+        \]
+        we can conclude that 
+        \[
+            \Phi'_{i,:}(t) = \sum_{k} A_{ik} (t) \Phi_{k, :}(t).
+        \]
+
+        We look at the $i$-th summand of the expression. We can conclude that 
+        \[
+            \det \begin{pmatrix}
+                -- & \Phi_{1, :}(t) & -- \\
+                -- & \Phi_{2, :}(t) & -- \\
+                -- & \sum_{k} A_{ik}(t) \Phi_{k, :}(t) & -- \\
+                -- & \Phi_{i + 1, :} & -- \\
+                & \vdots & \\
+                -- & \Phi_{d, :}(t) & -- \\
+            \end{pmatrix} = A_{ii}(t) \det \Phi(t).
+        \]
+
+        The desired result follows quickly from this point. 
+    \end{proof}
+
+
+    \begin{corollary}{}
+        If 
+        \[
+            \frac{1}{\det \Phi(t)} \dv{t} \det \Phi(t) = \tr(A(t)),
+        \]
+        then 
+        \[
+            \dv{t} \log(\det \Phi(t)) = \tr A(t) \implies \det \phi(t) = \det \phi(t_0) \exp \left(\int_{t_0}^t \tr(A(s)) \, \t{d}s\right).
+        \]
+    \end{corollary}
+
+    We can note that if $y' = A(t) y$, let $\Phi(t)$ be a FSM. then, any solution of (*) can be expressed as 
+    \[
+        y = \Phi(t) C,
+    \]
+    where $C$ is a constant vector. If $y(t_0) = \alpha$, then 
+    \[
+        \Phi(t_0) C = \alpha  \implies C = (\Phi(t_0))^{-1} \alpha.
+    \]
+    Thus, 
+    \[
+        y(t) = \Phi(t) (\Phi(t))^{-1}\alpha.
+    \]
+
+    \newpar
+    Now, we can consider the inhomogenous equation 
+    \[
+        y' = A(t)y + h(t).
+    \]
+
+    If $y_1$ and $y_2$ are solutions to the above differential equation, $y_1 = y_2$ solves $y' = A(t) y$. Thus, 
+    \[
+        y_1(t) = y_2(t) = \Phi(t) C,
+    \]
+    where $\Phi(t)$ is a FSM of the homogenous system $y' = A(t) y$. If $y_p(t)$ is any solution of the inhomogeneous system, then the general form of the solution of the inhomogeneous system is given by 
+    \[
+        y(t) = y_p(t) + \Phi(t) C.
+    \]
+
+    Finally, we can discuss variation of parameters. To find the particular solution $y_p$, you look for a solution $y_p(t) = \Phi(t) C(t)$. Then, 
+        \[y'(t) = \Phi'(t) c(t) + \Phi(t) c'(t) = A(t) \Phi(t) c(t) + h(t),\]
+    so since $\Phi'(t)c(t) = A(t) \Phi(t)c(t)$, it follows that $\Phi(t) c'(t) = h(t)$, so $c'(t) = \Phi^{-1}(t) h(t)$. From here, we can find $c(t)$. It follows that 
+        \[y(t) = \Phi(t) C + \Phi(t) \int_{t_0}^t \Phi^{-1}(s) h(s) \, \t{d}s,\]
+    where we set 
+        \[\Phi^{-1}(t_0) \alpha = C,\]
+    where $y(t_0) = \alpha$.
+
+\subsection*{Floquet Theory.}
+
+First, let us consider when $A \in \C^{d \times d}$. Given that 
+    \[\exp(A) = \sum_{n = 0}^\infty \frac{A^n}{n!},\]
+given $B \in \C^{d \times d}$ invertible, when can we write $B = \exp(A)$ for some $A$? That is, we want to define $\log(B)$. 
+\newpar
+
+First, let us recall that $\exp(MAM^{-1}) = M \exp(A) M^{-1}$. Then, $M^{-1} B M = \exp A$, so $B = M\exp(A)M^{-1} = \exp(MAM^{-1})$. If $\Sigma$ is a diagonal matrix, it is easy to define $\log(\Sigma)$ just by taking the logarithm of the diagonal entries. 
+\newpar
+
+Given $B \in \C^{d \times d}$ invertible that is possibly defective, let $\lambda_1, \hdots, \lambda_n$ be its distinct eigenvalues with multiplicities $m_1, \hdots, m_n$. Let $V(\lambda_j)$ be the generalized eigenspace associated with $\lambda_j$. $\C^{d} = \bigoplus_{k = 1}^n V(\lambda_k)$. $V(\lambda_j) = \ker(A - \lambda_j I)$. Given that $V(\lambda_j) = \ker((B - \lambda_j I)^{m_i})$, we can find a basis $\phi_{j, 1}, \hdots, \phi_{j, m_j}$. Let $M = (\phi_{1, 1}, \hdots, \phi_{1, m_1}, \phi_{2, 1}, \hdots, \phi_{2, m_2}, \hdots, \phi_{n, 1}, \hdots, \phi_{n, m_n})$. Then, $M^{-1} B M$ is in block diagonal form with blocks $B_1, \hdots, B_n$ satisfying $(B_j - \lambda_jI)^{m_j} = 0$. 
+
+
+\section*{19 September 2024}
+\begin{example}{}
+    Consider $y'' = -(1 + a(t))y$. Suppose $a(t)$ is continuous and $\omega$ periodic. Then, we can write the first order system
+    \begin{align*}
+        y_1' &= y_2 \\
+        y_2' &= -(1 + a(t_1))y_1,
+    \end{align*}
+
+    or in other words,
+    \[
+        \dv{t} \begin{pmatrix} y_1 \\y_2 \end{pmatrix} = \begin{pmatrix} 0 & 1 \\ -(1 + a(t)) & 0 \end{pmatrix} \begin{pmatrix} y_1 \\ y_2 \end{pmatrix}. \quad (*)
+    \]
+
+    Let $\Phi(t)$ be a FSM of $(U)$ such that $\Phi(0) = I$. We can look at the eigenvalues of $\Phi(\omega)$, which are the multipliers of the system (call them $\lambda_1, \lambda_2$). By Abel's theorem, we have that 
+    \[
+        \dv{t} \det \Phi(t) = \tr(A(t)) \det \Phi(t),
+    \] 
+    so we get 
+    \[
+        \det \Phi(t) + \det \Phi(0) \exp \left(\int_0^t \tr A(s) \, \t{d} s \right) = 1
+    \]
+    for all time. This implies that $\lambda_1 \cdot \lambda_2 = 1$. 
+    \newpar
+
+    \textbf{Claim:} For $\max\limits_{0 \leq t \leq \omega} |a(t)|$ small enough, all solutions of Hill's equation are bounded, provided that $\omega \neq 2\pi n$.
+    \newpar
+
+    We can note that for the system $z'' = -z$, the FSM is
+        \[
+            \tilde \Phi(t) = 
+            \begin{pmatrix}
+                \cos t & \sin t \\
+                -\sin t & \cos t
+            \end{pmatrix}.
+        \] 
+
+    Let $\phi_1(t)$ and $\phi_2(t)$ be two solutions of Hill's equation with solutions $\phi_1(0) = 1$, $\phi'_1(0) = 1$, $\phi_2(0) = 0$, $\phi_2'(0) = 1$. Then, 
+    \[
+        \Phi(\omega) = 
+        \begin{pmatrix}
+            \Phi_1(\omega) & \Phi_2(\omega) \\
+            \Phi_1'(\omega) & \Phi_2'(\omega).
+        \end{pmatrix}
+    \] 
+
+    To find the eigenvalues of $\Phi$, we first evaluate the characteristic polynomial, and we note that 
+    \begin{align*}
+        p_a(\lambda) &= (\Phi_1(\omega) - \lambda) (\Phi_2'(\omega) - \lambda) - \Phi_2(\omega) \Phi_1'(\omega) \\
+        &= \lambda^2 - \underbrace{(\Phi_1(\omega) + \Phi_2'(\omega))}_{\approx \cos(\omega) + \cos \omega
+        = 2\cos \omega} \lambda + \underbrace{\Phi_1(\omega) \Phi_2'(\omega) - \Phi_2(\omega) \Phi_1'(\omega)}_{= 1 \t{ since determinant}},
+    \end{align*}
+    where we used the fact that $\Phi_1 \approx \cos t$, $\Phi_2 \approx \sin t$ for $0 \leq t \leq \omega$. Thus, we can deduce that 
+    \begin{align*}
+        p(\lambda) = \lambda^2 - \beta \lambda + 1
+    \end{align*}
+    where $\beta \approx 2 \cos \omega$. Since $\omega \neq n(2\pi)$, we can assert that $|\beta| < 2$. Solving for $\lambda$, one can see that both eigenvalues must be complex. Since $\lambda_1$ and $\lambda_2$ are complex conjugates of each other, they must both have magniutudes equal to 1, so solutions to Hill's equations are bounded by Floquet's theorem. 
+
+\end{example}
+
+\begin{example}
+    Consider the equation $y'' = -\frac{1}{4} y$. Multiplying both sides by $y'$, we get 
+    \[
+        y'y'' = -\frac{1}{4} yy', 
+    \]
+    so we get that 
+    \[
+        \dv{t} (y')^2 + \frac{1}{4} \dv{t}(y^2) = 0,
+    \]
+
+    so the energy $E = (y')^2 + \frac{1}{4} y^2$ is conserved. All trajectories are ellipses with the same eccentricities. Similarly, if we consider the equation $y'' = -4 y$, by mutliplying both sides by $y'$ and then finding the conserved quantity, we get 
+    \[
+        E = (y')^2 + 4y^2
+    \]
+    and the corresponding phase portrait paths are elongated ellipses. If we denote the first and second system of differential equations as disussed above, we can write down 
+    \[
+        A_1 = \begin{pmatrix}
+        0 & 1 \\ -1/4 & 0 
+        \end{pmatrix}, \quad A_2 = \begin{pmatrix}
+        0 & 1 \\ 4 & 0 
+        \end{pmatrix}.
+    \]  
+
+    Now, let us consider a new system, where 
+    \[
+        \dv{t} \begin{pmatrix} z_1 \\ z_2 \end{pmatrix} = B_t \begin{pmatrix} z_1 \\ z_2 \end{pmatrix}, \quad \begin{pmatrix} z_1(0) \\ z_2(0) \end{pmatrix} = \begin{pmatrix} 0 \\ 1 \end{pmatrix},
+    \]
+    where we define 
+    \[
+        B(t) = \begin{cases}
+        A_1, \quad& 0 \leq t \leq \pi \\
+        A_2, \quad& \pi \leq t \leq \frac{5\pi}/4.
+        \end{cases}
+    \]
+    Extend $B(t)$ periodically $(\omega = \frac{5\pi}{4}$). It is easy to see that the phase portraits spin out into oblivion. 
+\end{example}
+
+\subsection*{Scalar First-Order Nonlinear Equations}
+First, we can consider the phase line for calar, first order, autonomous equations. Consider an equation of the form 
+\[
+    y' = f(y).
+\]
+
+We can find stationary solutions $f(y) = 0$. 
+\begin{example}
+    Consider the equation $y' = y(1 - y)$. This is the logistic equation. The critical points are located at $y = 0$ and $y = 1$. 
+    \newpar 
+
+    Take $f$ to be continuously differentiable. Now, we can discuss the stability of the critical points. Let $p$ be an isolated critical point (or equilibrium solution) of $y' = f(y)$ and that there exists $r > 0$ such that $| x - p | < r$ and $f(x) = 0$ implies $x = p$. Then, the sign of $f$ is constant in $(p, p+r)$ and $(p-r, p)$.If $ f > 0$ on $(p, p + r)$  and $f < 0$ on $(p - r, p)$, then $p$ is unstable. Likewise, one can analyze the other cases.  
+\end{example}
+
+\begin{theorem}[Claim.]{}
+    Suppose $y' = f(y)$ has $p < q$ as equilibrium solutions and $f(p) = f(q) = 0$, and $f(x) \neq 0$ for any $x \in (p, q)$. Then, there are two cases. Either $f > 0$ on $(p, q)$ or $f < 0$ on $(p, q)$. For the first case, if $x \in (p, q)$ and $y(0) = x$, then $\lim_{t \to \infty} y(t) = q$. The analogous result holds for the other case. 
+\end{theorem}
+
+\section*{24 September 2024}
+\begin{theorem}[Derivative Test for Stability.]{}
+    Let $P$ be an isolated critical point for $u' = f(u)$. If $f'(p) > 0$, then $p$ is unstable. If $f'(p) < 0$, then $p$ is an asymptotically stable equilibrium point. If $f'(p) = 0$, then our test is inconclusive. 
+\end{theorem}
+
+Consider the example of logistic growth given by $u' = u(1-u) = u - u^2$. Draw the phase portrait, and we know that if $u'(t) < 0$ for all $t \geq 0$ if $u(0) < 0$. Furthermore, by comparing with the equation $v' = -v^2$, we can see that $u$ goes down to $-\infty$ in finite time. 
+\newpar
+I`f we have 
+    \[
+        u' = f(t, u), \quad u(0) = \alpha \qquad(*)
+    \]
+    and $f$ is periodic in the $t$ variable with period $\omega$, then we consider $\phi(t, \alpha)$ which represents the solution of $(*)$ at time $t$. An important observation: If $u$ solves $u' = f(t, \alpha)$, then so does $u(t - \omega)$. Consider the map 
+    \[
+        \phi(\omega, \alpha) : D \to \R,
+    \]
+
+    and let $p(\alpha) = \phi(\omega, \alpha)$. $p$ is known as the Poincare map. An $\omega$-periodic solution of $(*)$ corresponds to a fixed point $\alpha$ of $p$. That is, $p(\alpha) = \alpha$.
+    \newpar
+
+    To illustrate this idea, consider a logistic equation with periodic harvesting. That is, we can consider
+    \[
+        u' = u(1 - u) - h(1 + sin(2\pi t)).
+    \]
+
+    For what values of $h$ do we have sustainable harvesting (that is, a periodic solution with period 1)? We can write 
+    \[
+        \partial_t \phi(t, \alpha) = f(t, \phi(t, \alpha))
+    \]
+    for all $t \geq 0$. The claim is that $\partial_\alpha\phi(t, \alpha)$ is a solution to another differential equation. In particular, we can note that 
+    \begin{align*}
+        \partial_t (\partial_\alpha \phi(t, \alpha)) &= \partial_\alpha \partial_t \phi(t, \alpha) \\
+        &= \partial_\alpha f(t, \phi(t, \alpha)) \\
+        &= \pdv{f}{u}\, {(t, \phi(t, \alpha))} \partial_\alpha \phi(t, \alpha).
+    \end{align*}
+
+    Solving, we can write down
+    \[
+        \partial_\alpha \phi(t, \alpha) = \partial_\alpha \phi(0, \alpha) \exp \left(\int_0^t \pdv{f}{u} \, (s, \phi(s, \alpha)) \, \t{d}s \right).
+    \]
+
+    We get that 
+    \[
+        \partial_\alpha \phi(0, \alpha) = \pdv{\alpha}{\alpha} = 1,
+    \]
+
+    so it follows that 
+    \[
+        \partial_a \phi(t, \alpha) = \exp \left( \int_0^1 \pdv{f}{u} \, (s, \phi(s, \alpha)) \, \t{d}s\right) > 0,
+    \]
+    so $\phi'(\alpha) > 0$ for all $\alpha$. To continue on, we can see what happens with the second derivative of $\alpha$. In particular, we have 
+    \begin{align*}
+        \partial_t \partial_\alpha^2 \phi(t, \alpha) &= \partial^2_\alpha \partial_t \phi(t, \alpha) \\
+        &= \partial_\alpha^2 f(t, \phi(t, \alpha)) \\
+        &= \partial_\alpha \left[\pdv{f}{u} \, (t, \phi(t, \alpha)) \partial_\alpha \phi(t, \alpha)\right] \\
+        &= \pdv[2]{f}{u} \, (t, \phi(t, \alpha)) (\partial_\alpha \phi)^2 (t, \alpha) + \pdv{f}{u} \, (t, \phi(t, \alpha)) \partial^2_\alpha \phi(t, \alpha).
+    \end{align*}
+
+    Recall that if $y' = a(t)y + b(t)$, then we have 
+    \[
+        y(t) = \exp \left(\int_0^t a(s) \, \t{d}s \right)\left[ y(0) + \int_0^t b(s) \exp \left(-\int_0^s a(\xi) \, \t{d} \xi \right) \, \t{d}s\right],
+    \]
+
+    Using the fact that $\partial_\alpha^2 \phi(0, \alpha) = 0$, then we can conclude that 
+    \[
+        \partial^2_\alpha \phi(t, \alpha) = \underbrace{\exp\left(\int_0^t a(s) \, \t{d}s \right)}_{> 0} \int_0^t \pdv[2]{f}{u} \, (s, \phi(s, \alpha)) \underbrace{(\partial_\alpha \phi)^2}_{> 0} (s, \alpha) \underbrace{\exp \left(-\int_0^s \alpha(\xi) d\xi \right)}_{> 0} \, \t{d}s.
+    \]
+    Since 
+    \[
+        f(t, u) = u(1 - u) - h(1 + \sin(2\pi t)),
+    \]
+    it follows that 
+    \[
+        \pdv[2]{f}{u} = -2,
+    \]
+    so $p(\alpha)$ is strictly concave, so there are at most two periodic solutions. In fact, if $x \in \t{domain}(p)$, if $u' = f(t, u)$, $f$ is smooth and $\omega$-periodic in $t$, then $\tilde x \in B_{\epsilon}(p)$ also belongs to $\t{domain}(p)$. By uniqueness, it follows that $p$ is strictly increasing.
+    \newpar
+    
+    \begin{theorem}{}
+        Let $p$ be a continuous, strictly increasing function. Let $\alpha_1 < \alpha_2$ be two fixed points of $p$ such that $p(\xi) \neq \xi$ for any $\alpha_1 < \xi < \alpha_2$. We can claim that
+        \begin{itemize}
+            \item[(1)] $p$ is a bijection from $[\alpha_1, \alpha_2] \to [\alpha_1, \alpha_2]$. 
+            \item[(2)] Either $p(\alpha) > \alpha$ for all $\alpha \in (\alpha_1, \alpha_2)$ or $p(\alpha) < \alpha$ for all $\alpha \in (\alpha_1, \alpha_2)$. 
+            \item[(3)] If $p(\alpha) > \alpha$ for all $\alpha \in (\alpha_1, \alpha_2)$, then $p^n (\alpha) = \underbrace{p \circ p \circ \hdots \circ p}_{n\t{ times}}(\alpha) \to \alpha_2$ as $n \to \infty$.  
+        \end{itemize}
+    \end{theorem}
+
+    \begin{proof}
+        If $\alpha_1 \leq \alpha \leq \alpha_2$, then $\alpha_1 = p(\alpha_1) \leq p(\alpha) \leq p(\alpha_2) = \alpha_2$. If $\alpha_1 \leq \alpha < \tilde \alpha \leq \alpha_2$, then $p(\alpha) < p(\tilde \alpha)$, so $p$ is injective. Furthermore, take $\xi \in (\alpha_1, \alpha_2)$, and look at $p(\alpha) - \xi \big|_{\alpha = \alpha_1} = \alpha_1 - \xi < 0$. Likewise, $p(\alpha) - \xi \big|_{\alpha = \alpha_2} = \alpha_2 - \epsilon > 0$. Item (2) follows immediately from IVT. To show (3), we note that $p^n(\beta) \in (\alpha_1, \alpha_2]$ for all $n$ due to (1) and $p^{n + 1}(\beta) \geq p^n (\beta)$ for all $n$, so 
+        \[
+            \{p^n(\beta)\}_{n = 1}^\infty
+        \]
+        is an increasing sequence bounded from above by $\alpha_2$. Thus, it follows that 
+        \[
+            \lim_{n \to \infty} p^n(\beta) = L \in (\alpha_1, \alpha_2].
+        \]
+        Note that 
+        \[
+            L = \lim_{n \to \infty} p(p^n(\beta)) = p(\lim_{n \to \infty} p^n (\beta)) = p(L),
+        \]
+        so it follows that $L = \alpha_2$. 
+    \end{proof}
+
+\section*{26 September 2024}
+    \begin{theorem}[Claim.]{}
+        If $p(\alpha) = \alpha$ and $p'(\alpha) < 1$, then $\alpha$ is asymptotically stable. Furthermore, if $p'(\alpha) > 1$, then $\alpha$ is unstable. 
+    \end{theorem}
+
+    From this, we can conclude that if $p(\alpha) = \alpha$ and $p'(\alpha) < 1$, then the periodic solution $y' = f(t, y)$ with the initial condition $y(0) = \alpha$ is periodic and asymptotically stable. 
+    \newpar
+
+    Now, let us consider Autonomous systems. Namely, we have 
+    \[
+        u' = f(u) \qquad(*)
+    \] 
+
+    where $u : \R \to \R$ and $f : \R^n \to \R^n$, which is a vector field. Assume it is at least Lipshitz (we will assume smooth for now). If $u(t)$ solves $(*)$. then $u(t - c)$ also solves $(*)$. One of the most important feature of autonomous equations are stationary solutions (also known as stationary solutions or critical points)> These are solutions of the form $f(p) = 0$, so the constant $u(t) = p$ is a solution. 
+    \newpar
+
+    \begin{example}{}
+        Consider the system 
+        \begin{align*}
+            u_1' &= u_1(1 - u_2) \\
+            u_2' &= (u_1 - 5)(u_2 - 3).
+        \end{align*}
+
+        Consider the vector field 
+        \[
+            f(u_1, u_2) = (u_1(1 - u_1), (u_1 -5)(u_2 - 3)),
+        \]
+        so we can conclude that $f(u_1, u_2) = 0$ precisely when $(u_1, u_2) = (0, 3)$ or $(u_1, u_2) = (5, 1)$. 
+    \end{example}
+
+    To inspect the solutions to $(*)$ near a critial point $u = p$, we replace $f$ by its linearization at $p$. This means do the Taylor Expansion of $f$. Namely, 
+    \[
+        f(u) = f(p) + Df(p) (u - p) + O(|u - p|^2)
+    \]
+    as $u \to p$. We can write 
+    \[
+        (v - p)' = Df(p)(v - p),
+    \]
+
+    so just by defining $w = v - p$, we can write down 
+    \[
+        w' = Df(p) w. \qquad(**)
+    \]
+
+    This is a first order $n \times n$ homogeneous linear system. Now, we can ask questions about the behavior of the system. The question is now if the stability/instability of $w = 0$ for $(**)$ predict that of $u = p$ for system $(*)$? Not always necessarily.
+
+    \begin{example}{}
+        We can linearize $(u_1, u_2)$ in the previous example at $(0, 3)$. We can note that 
+        \[
+            Df(u_1, u_2) = 
+            \begin{pmatrix}
+                1-u_1 & -u_1 \\
+                u_2 - 3 & u_1 - 5
+            \end{pmatrix}.
+        \]
+
+        Evaluating at the critical point $(0, 3)$, we can note that our system reduces to 
+        \[
+            w' = 
+            \begin{pmatrix}
+                -2 & 0 \\
+                0 & -5
+            \end{pmatrix},
+        \]
+
+        so $w = 0$ is asymptotically stable with a stable node. Now the question is whether the linearization implies asymptotical stability of the original equaiton.
+    \end{example}
+
+    \begin{theorem}[Claim.]{}
+        Consider a system $u' = Au + f(t, u)$ where $(u : \R \to \R^n)$ where the constant $n \times n$ matrix $A$ has eigenvalues with negative real parts. Suppose $f$ is smooth and globally Lipshitz in the $u$ variable. Then there exists an $\epsilon > 0$ such that if $|f(t, u)| < \epsilon |u|$ for all $t$ and $u$, then $u = 0$ is asymptotically stable. then $u = 0$ is asymptotically $0$ 
+    \end{theorem}
+    \begin{proof}
+        Variation of parameters formula (Duhamel) tells us that 
+        \[
+            u(t) = e^{At}u(0) + \int_0^t e^{A(t - s)} f(s) u(s) \, \t{d}s.
+        \]  
+
+        The fact that $A$ has eigenvalues with strictly negative real parts implies that there exists a constant $M$ and $\delta > 0$ such that $||e^{At}|| < Me^{-\delta t}$. Thus, 
+        \begin{align*}
+            |u(t)| &\leq  ||e^{At}|| |u(0)| + \int_0^t ||e^{A(t - s)}|| |f(s)| |u(s)| \, \t{d}s \\
+            &\leq Me^{-\delta t} |u(0)| + \int_0^t \epsilon M e^{-\delta (t - s)} |u(s) | \, \t{d} s.
+        \end{align*}
+
+        Multiplying both sides by $e^{-\delta t}$, we can write down 
+        \[
+            \underbrace{e^{\delta t}|u(t)|}_{=\phi(t)} \leq M|u(0)| + \int_0^t \epsilon M \underbrace{e^{\delta s} |u(s)|}_{\phi(s)} \, \t{d} s \implies \phi(t) \leq M|u(0)| + \int_0^t \epsilon M \phi(s) \, \t{d}s. 
+        \]
+
+        By Gronwall inequality applied to $\phi$, we have 
+        \[
+            e^{\delta t} |u(t)| = \phi(t) \leq M |u(0)| \exp(\epsilon M t),
+        \]
+
+        so we get 
+        \[
+            |u(t)| \leq M|u(0)| \exp ((\epsilon M - \delta) t).
+        \]
+
+        Choose $0 < \epsilon < \delta / M$. Thus, we immediately get stability and asymptotical stability for $u = 0$. 
+    \end{proof}
+
+\section*{1 October 2024}
+    Can the origin be stable for the linearized system, but unstable for the nonlinear system? Yes. Consider the system 
+    \begin{align*}
+        x' &= y + x^3\\
+        y' &= -x + y^3.
+    \end{align*}
+    The linearization of the system at the point $(0, 0)$ is merely 
+    \[
+        w' = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix} w
+    \]
+    and the eigenvalues are both complex with zero real part, so the origin is a stable fixed point. To solve the general linear system, we can rewrite the equation as 
+    \begin{align*}
+        xx' &= x(y + x^3)\\
+        yy' &= y(-x + y^3),
+    \end{align*}
+
+    so by aadding the two equations together, we can write down 
+    \[
+        \dv{t} \left\{\frac{1}{2} x^2 + \frac{1}{2} y^2\right\} = x^4 + y^4 \geq 0,
+    \]
+    and is identically zero at zero. By examining the trajectories in phase space, we can establish that the nonlinear system is unstable at the origin. On a similar note, the zero solution of 
+    \begin{align*}
+        x' &= y - x^3\\
+        y' &= -x - y^3
+    \end{align*} 
+    is asymptotically stable. Now, what if the linearized system is unstable at the origin? Then, it is still possible for the nonlinear system to be unstable. Consider the equation 
+    \[
+        x'' = -x^3.
+    \]
+    Then, we can write down 
+    \[
+        \dv{t} \left(\frac{(x')^2}{2} + \frac{1}{4} x^4\right) = 0
+    \]  
+    which implies that 
+    \[
+        \frac{(x')^2}{2} + \frac{1}{4} x^4 
+    \]
+    is constant along any solution. Thus, if $y= x'$, the energy term 
+    \[
+        E(x, y) = \frac{1}{2} y^2 + \frac{1}{4} x^4
+    \] 
+    is constant along trajectories. Since the level curves are convex shapes, it is easy to see that the solutions are indeed stable (but not asymptotically stable). Despite this, the linearized equation 
+    \[
+        w' = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}
+    \]
+    has linearly growing terms (so must be unstable). What about if you have a matrix with strictly positive real parts and strictly negative real parts. In the linearized case, this implies we have a saddle. 
+    \newpar
+
+    We now specify the stable and unstable manifold theorem (which is called the stable and unstable curve theorem in 2D). 
+    
+    \begin{theorem}[Stable and Unstable Curve Theorem.]{}
+        Let us consider the equation 
+        \[
+            y' = f(y), \quad f(0) = 0,
+        \]
+        and suppose the matrix $Df(0)$ has two real eigenvalues $-\mu < 0 < \lambda$, where $\mu, \lambda > 0$. Then, in a small neighborhood of the origin, there is a curve $\Gamma$ such that 
+        \begin{enumerate}
+            \item[(1)] $\Gamma$ contains $(0, 0)$.
+            \item[(2)] Any trajectory that starts on $\Gamma$ stays on $\Gamma$ and goes to the origin as $t \to \infty$. 
+            \item[(3)] $\Gamma$ is tangent to the eigenvector corresponding to the eigenvalue $-\mu$ at the origin. 
+            \item[(4)] Any trajectory that starts off $\Gamma$ exits the neighborhood in finite time.    
+        \end{enumerate}
+    \end{theorem}
+    \begin{proof}
+        Suppose $w' = Aw$ where $A = MDM^{-1}$. Thus, we can write 
+        \[
+            (M^{-1} w)' = DM^{-1} w,
+        \]
+        so $u' = Du$. Thus, $u = M^{-1} w$, and $w = Mu$. Make this change of variables in the nonlinear system. Namely, $y= Mu$, so $Mu' = f(Mu)$ so $u' = M^{-1} f(Mu)$. Linearizing in $u$, we get $u' = Du$. We can assume that the eigenvectors of $Df(0)$ are $(1, 0)^T$ for $\lambda$, and $(0, 1)^T$ for $\mu$. We can write 
+        \begin{align*}
+            x' &= \lambda x + f_1(x, y), \\
+            y' &= -\mu y + f_2(x, y)
+        \end{align*}
+        where $|f_1(x, y)|, |f_2(x, y)| \leq C(x^2 + y^2)$ for $x^2 + y^2 \leq r^2$. Now, let us define $C_M = \{|y| \geq M|x|\}$ and we can consider the intersection of this region with $Q_\epsilon = \{|x| \leq \frac{\epsilon}{2} \t{ and } |y| \leq \frac{\epsilon}{2}\}$. First, we can note that for $\epsilon > 0$ small enough and $M> 0$ large enoug, trajectories in $Q_\epsilon \cap \{y > 0\}$ are travelling down. In particular, 
+        \begin{align*}
+            y' = -\mu y + f_2(x, y) &\leq -\mu y + |f_2(x, y)| \\
+            &\leq -\mu y + C(x^2 + y^2) \\
+            &\leq -\mu y + C\left(\frac{y^2}{M^2} + y^2 \right) \\
+            &\leq -\mu y + Cy^2 \left(1 + \frac{1}{M^2} \right) \\
+            &\leq -\mu y + C\epsilon\left(1 + \frac{1}{M^2} \right) y < 0,
+        \end{align*}
+        if $y > 0$. Let $\ell^+ = \left\{(x, y) : y = \epsilon, \, -\frac{\epsilon}{M} < x < \frac{\epsilon}{M}\right\}$. Along the right boundary of $C_M^+ \cap Q_\epsilon$, we can note that 
+        \begin{align*}
+            x' &= \lambda x + f_1(x, y) \\
+            &\geq \lambda x - L(x^2 + y^2) \\
+            &= \lambda x - L(x^2 + M^2 x^2) \\
+            &= \lambda x - xL(1 + M^2) x \\
+            &\geq \lambda x - L(1 + M^2) \epsilon x \\
+            &= \{\lambda - L(1 + M^2)\epsilon \}x.
+        \end{align*}
+        Choose $\epsilon > 0$ so small that $L(1 + M^2) \epsilon < \lambda$. Call the two endpoints of $\ell^+$ $p$ and $q$. There is a neighborhood $B_\delta(q)$ such that if a trajectory starts on $B_\delta(q) \cap \ell^+$, then the trajecctory must exist $C_M^+ \cap Q_\epsilon$ from the right boundary. Let us take $S_R^+$ to be the set of all points $\xi \in \ell^+ : $ trajectories starting at $\xi$ exit $C_M^+ \cap Q_\epsilon$ in finite time from the right boundary$.$ Take $S^+_L$ to be defined analogously. By continuous dependence on initial data, $S_R^+$ and $S_L^+$ are open, nonempty, and disjoint. As a conclusion, $S_R^+ \cap S_L^+ \neq \ell^+$, so there exists a point $\eta \in \ell^+ \setminus (S_L^+ \cup S_L^+)$ that remains in $C_M^+ \cap Q_\epsilon$. Trajectories that start at $\eta \in \ell^+$ has to converge to $(0, 0)$. In fact, there is only one point $\eta \in \ell^+$ such that the trajectory starting at $\eta$ goes to $(0, 0)$. We will show this next. 
+        \newpar 
+
+        Note that $u' = F(u)$ where $F: \R^d \to \R^d$, we can reparametrize $u$ so that $v' = \Phi(v) F(v)$ where $\Phi: \R^d \to \R$, with $\phi \neq 0$. With this, we can reparametrize our original system 
+        \begin{align*}
+            x' &= \lambda x + f_1(x, y) \\
+            y' &= -\mu y + f_2(x, y), \\
+        \end{align*}
+        so we can reparametrize our system as 
+        \begin{align*}  
+            \overline{x}' &= \frac{\lambda \overline x + f_1(\overline x, \overline y)}{\mu - f_2(x, y) / y} =: H(\overline x, \overline y).\\
+            \overline y ' &= -\overline y. 
+        \end{align*}
+        $(x, y)$ and $(\ol x, \ol y)$ systems have the same shaped trajectories. Now, we claim that 
+        \[
+            \pdv{H}{x}(\ol x, \ol y) \geq 0 \t{ for } (\ol x, \ol y) \in C_M^+ \cap Q_\epsilon. 
+        \]
+        The implication is that $(\ol x, \ol y) |_{t = 0} = y$, and $(\ol{\mathbf x}, \ol{\mathbf y}) |_{t = 0} = y'$, so the two solutions $\ol x(t)$ and $\ol{\mathbf x}(t)$ are getting further apart. With this, we can prove the claim. In particular, we have 
+        \[
+            H(x, y) = \frac{\lambda x y + y f_1(x, y)}{\mu y - f_2(x, y)},
+        \]
+        so we can see that 
+        \[
+            \pdv{H}{x} = \frac{\left(\lambda y + y \pdv{f_1}{x}(x, y)\right)(\mu y - f_2(x, y)) + (\lambda xy + yf_1(x, y)) \pdv{f_2}{y}(x, y)}{(\mu y - f_2 (x, y))^2}  \approx \frac{\lambda \mu y^2}{\mu^2 y^2} = \frac{\lambda}{\mu} > 0. 
+        \]
+
+        This implies that the curve is unique. 
+    \end{proof}
+
+\section*{8 October 2024}
+    Suppose $y' = Ay + f(y)$ with $f(0) = 0$ and $Df(0) = 0$, with $f$ being smooth. Let 
+    \begin{align*}
+        E_S &= \R^d \cap \rm{Span} \left\{ v \in \C^d : (A - \lambda I)^d v = 0 \t{ where } \lambda \in \Lambda(A) \t{ with } \Re(\lambda) < 0\right\} \\
+        E_U &= \R^d \cap \rm{Span} \left\{ v \in \C^d : (A - \lambda I)^d v = 0 \t{ where } \lambda \in \Lambda(A) \t{ with } \Re(\lambda) > 0\right\} \\
+        E_C &= \R^d \cap \rm{Span} \left\{ v \in \C^d : (A - \lambda I)^d v = 0 \t{ where } \lambda \in \Lambda(A) \t{ with } \Re(\lambda) = 0\right\}.
+    \end{align*}
+
+    \begin{theorem}{}
+        In a small neighborhood of $0$, there exist invariant surfaces $S, U, $ and $C$ that contain 0 and are tangent to $E_S$, $E_U$, and $E_C$ at 0 respectively. 
+        \newpar 
+
+        If $E_U = \{0\}$ and and the projected ODE onto $C$ is asymptotically stable (unstable), then $y = 0$ is asymptotically stable (unstable). Note that the dimensions of $S$, $U$, and $C$ are that of $E_S$, $E_U$, and $E_C$. 
+    \end{theorem}
+    Before proving this theorem, we must first define the porjected system onto $C$. First, we put the system into standard form - that is we do a linear change of variables 
+    \begin{align*}
+        u' &= Mu + f(u, v) \\
+        v' &= Nu + g(u, v)
+    \end{align*}
+    where $\Re(\lambda) = 0$ if $\lambda$ is an eigenvalue of $M$, and $\Re(\lambda) < 0$ if $\lambda \in \Lambda(N)$. The linear approximation of the system is now decoupled. Since $C$ is tangent to $u_1, \hdots, u_m$ axis, $C$ can be written as the graph of a function $(u_1, \hdots, u_m)$. That is 
+    \[
+        (v_1, \hdots, v_{d - m}) = h(u_1, \hdots, u_m), \quad h : \R^m \to \R^{d - m}.
+    \]
+    Namely, we write 
+    \[
+        C = \{(u, v) \in \R^d : v = h(u)\}.
+    \]
+
+    Since $C$ is invariant, any trajectory that starts on $C$ will forever live on $C$, so it follows that 
+    \[
+        u' = Mu + f(u, h(u)). 
+    \]
+    This is our projected ODE. All that remains is to find $h$. To do this, we note that 
+    \begin{align*}
+        v &= h(u) \\
+        v' &= Dh(u) u' = Dh(u) \left\{Mu + f(u, h(u))\right\} = Nh(u) + g(u, h(u)).
+    \end{align*}
+    Thus, $h$ solves a first-order Hamilton Jacobi PDE
+    \[
+        Dh(u) \left\{Mu + f(u, h(u)) \right\} - Nh(u) - g(u, h(u)) = 0. \qquad (*)
+    \]
+    Note that $(*)$ is usually impossible to solve explicitly; however, we just need an approximation to $h(u)$. 
+
+    \begin{example}{}
+        Consider 
+        \begin{align*}
+            u' &= v\\
+            v' &= -v + u^2 + 3uv.
+        \end{align*}
+        The linearization of this ODE is given by 
+        \begin{align*}
+            \begin{pmatrix}
+                u \\ v
+            \end{pmatrix}^* = 
+            \underbrace{
+                \begin{pmatrix}
+                    0 & 1 \\
+                    0 & -1
+                \end{pmatrix}}_{=A}
+            \begin{pmatrix}
+                u \\ v
+            \end{pmatrix}
+            + 
+            \begin{pmatrix}
+                0 \\
+                u^2 + 3uv    
+            \end{pmatrix}
+        \end{align*}
+        Now, we find the eigenvalues and eigenvectors of $A$. In particular, we have $\lambda_1 = 0$ with eigenvector $(1, 0)^T$ and $\lambda_2 = -1$ with eigenvector $(1, -1)^T$. We an note that 
+        \[
+            A = T
+            \begin{pmatrix}
+                0 & 0 \\
+                0 & -1
+            \end{pmatrix}
+            T^{-1},
+        \]
+        where 
+        \[
+            T = 
+            \begin{pmatrix}
+                1 & 1 \\
+                0 & -1    
+            \end{pmatrix}
+        \].
+
+        After changing the basis, we get 
+        \[
+            \begin{pmatrix}
+                x \\
+                y
+            \end{pmatrix}' = 
+            \begin{pmatrix}
+                0 & 0 \\
+                0 & -1
+            \end{pmatrix}
+            \begin{pmatrix}
+                x \\ y 
+            \end{pmatrix} + 
+            \begin{pmatrix}
+                1 & 1 \\
+                0 & -1 
+            \end{pmatrix}
+            \begin{pmatrix}
+                0 \\
+                u^2 + 3uv
+            \end{pmatrix}.
+        \]
+
+        It follows that 
+        \begin{align*}
+            x' &= (x + y)^2 - 3(x + y) y \\
+            y' &= -y - (x + y)^2 + 3(x + y) y.
+        \end{align*}
+
+        This is in standard form, so $Ny = -y$ and $(x + y)^2 - 3(x + y) y = f(x, y)$ and $-(x + y)^2 + 3(x + y) y = g(x, y)$. On $C$, the PDE for $h$ becomes 
+        \[
+            h'(x) \left\{ (x + h(x))^2 - 3(x + h(x))h(x)\right\} + h(x) - (x + h(x))^2 - 3(x + h(x))h(x) = 0.
+        \]
+        By noting that $C$ passes through the origin and is tangent to the $x$-axis, we try an ansatz of the form $x^2 q(x)$, where $q(x)$ is analytic. Expand as a series and equate terms. Doing so, we can conclude that 
+        \[
+            h(x) = -x^2 + x^3 + \t{HOT}
+        \]
+        for some $b$. So, our projected ODE looks like 
+        \begin{align*}
+            x' &= f(x, h(x)) = (x + y)^2 - 3(x + y)y \bigg|_{y = h(x)} \\
+            &= (x - x^2 + x^3 + \t{HOT})^2 - 3(x - x^2 + x^3 + \t{HOT})(x^2 + x^3 + \t{HOT}) \\
+            &= x^2 + \gamma x^3 + \t{HOT}.
+        \end{align*}
+
+        The projected ODE is one dimensional, so we can study the stability of the one dimensional system at the origin. By considering the one-dimensional phase portrait, it follows that the $0$ solution is unstable. 
+    \end{example}
+
+    \section*{10 October 2024}
+        Consider the ODE system
+        \begin{align*}
+            u' &= uv \\
+            v' &= -v - u^2
+        \end{align*}
+        Then, there is no need to make a preliminary linear change of variables, since the linear part is already decoupled. The reduced ODE on the center manifold is given by 
+        \[
+            u' = u \cdot O(u^2) = cu^3 + O(u^4).
+        \]
+        This does not tell us anything about the stability of the solution, so we need more terms in our expansion. If we try $h(u) = au^2 + O(u^3)$, we get for our Hamilton-Jacobi equation
+        \[
+            h'(u) \left\{0 + uh(u) \right\} + h(u) + u^2 = 0,
+        \]  
+        so by matching coefficients, we determine that $a = -1$, so by drawing the phase portrait of $u$, by central manifold theory, we determine that the origin must be asymptotically stable. We can demonstrate one more example of central manifold theory. In this case, take 
+        \begin{align*}
+            \begin{pmatrix}
+                x \\ y \\ z
+            \end{pmatrix}' = 
+            \underbrace{
+            \begin{pmatrix}
+                0 & -1 & 0 \\
+                1 & 0 & 0 \\
+                0 & 0 & -1
+            \end{pmatrix}}_{= A}
+            \begin{pmatrix}
+                x \\ y \\ z 
+            \end{pmatrix} + 
+            \begin{pmatrix}
+                xz \\ yz \\ -(x^2 + y^2) + z^2
+            \end{pmatrix}.
+        \end{align*}
+        Our system is already decoupled to the extent to which we need it to be. The eigenvalues of $A$ are $\pm i$ and $-1$.Since this equation is already in standard form, there is no need for the preliminary linear change of variables. As a conclusion, our center manifold $C$ is tangent to the $xy$-plane. On $C$, $z =h(x, y)$, so we can attempt to find a reduced system that is $2 \time 2$ on the center manifold. Try $h = O(r^2) = O(x^2 + y^2)$. The projected ODE systmem is going to be 
+        \begin{align*}
+            x' &= -y + xO(r^2) = -y + O(r^3)\\
+            y' &= x + yO(r^2) = x + O(r^3).
+        \end{align*} 
+        To examine the behavior of this system, we can consider 
+        \begin{align*}
+            x' &= -y \pm x^3 \\
+            y' &= x \pm y^3,
+        \end{align*}
+        so we can conclude that 
+        \begin{align*}
+            \dv{t}(x^2 + y^2) = \pm2(x^4 + y^4),
+        \end{align*}
+        which changes stability based on the sign, so our original ansatz was inconclusive. So, let us try 
+        \[
+            h(x, y) = ax^2 + bxy + cy^2 + O(r^3). 
+        \]
+        Then, 
+        \[
+            Dh(u) \left\{Mu + f(u, h(u))\right\} - Nh(u) - g(u, h(u)) = 0.
+        \]
+        so we get some awful PDE which we then have to solve. Doing some algebraic stuff, we figure out that $a = -1$ and $c = -1$, so 
+        \[
+            h(x, y) = -x^2 -y^2 + O(r^3).
+        \]
+        Our projected ODE is thus given by 
+        \begin{align*}
+            x' &= -y + x(-x^2 - y^2) + O(r^4) \\
+            y' &= x + y(-x^2 + y^2) + O(r^4),
+        \end{align*}
+        so we have 
+        \begin{align*}
+            \frac{1}{2} \dv{t} \left(x^2 + y^2\right) &= x^2 (-x^2 - y^2) + O(r^5) + y^2(-x^2 - y^2) + O(r^5) \\
+            &= -(x^2 + y^2)^2 + O(r^5),
+        \end{align*}
+        so in $r$, we write down 
+        \begin{align*}
+            \frac{1}{2} \dv{t} r^2 = -r^4 + O(r^5),
+        \end{align*}
+        so if we set $r^2 = R$, then we can conclude that 
+        \[
+            \frac{1}{2} \dv{t} R = -R^2 + O(R^{5/2}),
+        \]
+        so as it turns out, our system is stable. 
+\end{document}
